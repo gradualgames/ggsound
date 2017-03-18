@@ -115,7 +115,7 @@ to help exercise GGSound and the converter.
 * 2-17-16: Added support for note cuts.
 * 1-16-16: Fixed a bug in ft_txt_to_asm.py for all assemblers
 * that allows it to output correct song headers under
-* Python 2.x.
+Python 2.x.
 
 # Including GGSound in a CA65 program:
 
