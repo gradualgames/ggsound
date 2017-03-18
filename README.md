@@ -84,7 +84,7 @@ GGSound.
 * Peter McQuillan - For bug reports and supplying sample songs
 to help exercise GGSound and the converter.
 
-#Changes:
+# Changes:
 * 8-28-16: Fixed two bugs in converter:
            Sfx envelope length determination has been fixed.
            Patterns are now looked up by id.
