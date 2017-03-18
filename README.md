@@ -1,5 +1,5 @@
 # GGSound Guide
-## by Derek Andrews <derek.george.andrews@gmail.com>
+## by Derek Andrews <gradualgames@gmail.com>
 
 # Introduction:
 
