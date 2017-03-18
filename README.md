@@ -76,9 +76,9 @@ GGSound.
 * alekmaul - For asking for new features on nesdev.
 * Hamtaro126 - For asking for new features on nesdev.
 * 8bitMicroGuy - For supplying a sample song to help exercise
-* GGSound and the converter.
+GGSound and the converter.
 * Velathnos 2.0 - For supplying a sample song to help exercise
-* GGSound and the converter.
+GGSound and the converter.
 * darryl.revok - For bug reports and supplying sample songs to
 * help exercise GGSound and the converter.
 * Peter McQuillan - For bug reports and supplying sample songs
