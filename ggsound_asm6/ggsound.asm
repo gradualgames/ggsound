@@ -910,6 +910,7 @@ noise_play_note:
     sta sound_local_byte_0
 
     ;Advance pitch regardless of duty bit.
+    clc
     lda stream_channel_register_3,x
     adc (sound_local_word_0),y
     and #%00001111
