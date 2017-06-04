@@ -3,6 +3,15 @@
 
 # Introduction:
 
+GGSound is a lightweight sound engine for use in NES homebrew games.
+It comes with an easy to use python script called ft_txt_to_asm.py which
+converts FamiTracker text exports into data usable by this sound engine.
+It supports a subset of FamiTracker's features, so that the amount of
+cpu time required by GGSound while in use in a game is smaller than the
+full FamiTracker driver. The trade-off is that a composer working with
+this sound engine will have to bake effects into individual envelopes,
+in most cases.
+
 This guide explains how to use GGSound and its associated tools. The
 GGSound distribution comes with the following:
 
@@ -85,6 +94,12 @@ help exercise GGSound and the converter.
 to help exercise GGSound and the converter.
 
 # Changes:
+* 6-4-17:  Added pitch envelope support for the noise channel.
+           Note that FamiTracker appears to stop at note 0
+           even if the delta continues down, but wraps after
+           note 15 if the delta continues up. GGSound instead
+           wraps regardless of whether the delta goes past 0 or
+           15.
 * 8-28-16: Fixed two bugs in converter:
            Sfx envelope length determination has been fixed.
            Patterns are now looked up by id.

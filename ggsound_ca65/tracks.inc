@@ -19,5 +19,6 @@ sfx_index_sfx_shot = 0
 sfx_index_sfx_laser = 1
 sfx_index_sfx_dpcm = 2
 sfx_index_sfx_zap = 3
+sfx_index_sfx_collide = 4
 
 .endif

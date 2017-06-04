@@ -216,7 +216,7 @@ main_loop:
     cmp #%00000001
     bne .skipa
 
-    lda #sfx_index_sfx_zap
+    lda #sfx_index_sfx_collide
     sta sound_param_byte_0
     lda #soundeffect_one
     sta sound_param_byte_1

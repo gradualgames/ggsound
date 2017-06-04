@@ -47,11 +47,11 @@ def process_note(note):
 def format_note(note):
     if note != "...":
         #if third char is #, this is a noise note (which don't use the note equates,
-        #they are just raw values. We must convert them by mirroring them against 15,
-        #for some reason they are in reverse in famitracker versus actual values that
-        #get written to 2A03 registers.
+        #they are just raw values.) Note: previously this code mirrored the value
+        #against 15, but this has been delegated to apu register upload within
+        #ggsound itself to allow noise pitch envelopes to operate naturally.
         if note[2] == "#":
-            note = str(15 - int(note[0], 16))
+            note = str(int(note[0], 16))
         else:
             if note[1] == "#":
                 note = note[0] + "S" + note[2]

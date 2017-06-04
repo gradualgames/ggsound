@@ -918,16 +918,24 @@ pitch_stop:
 
 .proc noise_play_note
 
-    ;Load note index.
+    ;Load note index. (really more of a "sound type" for noise)
     lda stream_byte
     and #%01111111
     sta sound_local_byte_0
 
-    ;Note index is actually the "sound type" for noise channel.
+    ;Skip loading note pitch if already loaded, to allow envelopes
+    ;to modify the pitch.
+    lda stream_flags,x
+    and #STREAM_PITCH_LOADED_TEST
+    bne pitch_already_loaded
+    lda stream_flags,x
+    ora #STREAM_PITCH_LOADED_SET
+    sta stream_flags,x
     lda stream_channel_register_3,x
     and #%10000000
     ora sound_local_byte_0
     sta stream_channel_register_3,x
+pitch_already_loaded:
 
     ;Load volume index.
     lda stream_volume_index,x
@@ -964,6 +972,52 @@ skip_volume_loop:
     ;Move volume offset along.
     inc stream_volume_offset,x
 volume_stop:
+
+    ;Load pitch index.
+    lda stream_pitch_index,x
+    asl
+    tay
+    ;Load pitch address.
+    lda (base_address_pitch_envelopes),y
+    sta sound_local_word_0
+    iny
+    lda (base_address_pitch_envelopes),y
+    sta sound_local_word_0+1
+    ;Load pitch offset.
+    ldy stream_pitch_offset,x
+
+    ;Load pitch value.
+    lda (sound_local_word_0),y
+    cmp #ENV_STOP
+    beq pitch_stop
+    cmp #ENV_LOOP
+    bne skip_pitch_loop
+
+    ;We hit a loop opcode, advance envelope index and load loop point.
+    iny
+    lda (sound_local_word_0),y
+    sta stream_pitch_offset,x
+    tay
+
+skip_pitch_loop:
+
+    ;Save off current duty bit.
+    lda stream_channel_register_3,x
+    and #%10000000
+    sta sound_local_byte_0
+
+    ;Advance pitch regardless of duty bit.
+    lda stream_channel_register_3,x
+    adc (sound_local_word_0),y
+    and #%00001111
+    ;Get duty bit back in.
+    ora sound_local_byte_0
+    sta stream_channel_register_3,x
+
+    ;Move pitch offset along.
+    inc stream_pitch_offset,x
+
+pitch_stop:
 
 duty_code:
     ;Load duty index.
@@ -2160,6 +2214,9 @@ noise:
     lda apu_register_sets+12
     sta $400C
     lda apu_register_sets+14
+    ;Our notes go from 0 to 15 (low to high)
+    ;but noise channel's low to high is 15 to 0.
+    eor #$0f
     sta $400E
     lda apu_register_sets+15
     sta $400F
