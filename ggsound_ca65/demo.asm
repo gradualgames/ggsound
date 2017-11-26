@@ -29,7 +29,7 @@ palette:
     .byte $0e,$0e,$09,$1a,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e
 
 tv_system_to_sound_region:
-    .byte 0, 2, 2, 2
+    .byte SOUND_REGION_NTSC, SOUND_REGION_PAL, SOUND_REGION_DENDY, SOUND_REGION_NTSC
 
 reset:
     ;Set interrupt disable flag.

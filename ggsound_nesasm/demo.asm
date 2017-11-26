@@ -56,7 +56,7 @@ palette:
     .db $0e,$0e,$09,$1a,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e,$0e
 
 tv_system_to_sound_region:
-    .db 0, 2, 2, 2
+    .db SOUND_REGION_NTSC, SOUND_REGION_PAL, SOUND_REGION_DENDY, SOUND_REGION_NTSC
 
 ;****************************************************************
 ;Demo entry point

@@ -1,4 +1,4 @@
-;Expects sound_param_byte_0 to contain desired region (SOUND_REGION_NTSC or SOUND_REGION_PAL)
+;Expects sound_param_byte_0 to contain desired region (SOUND_REGION_NTSC, SOUND_REGION_PAL, SOUND_REGION_DENDY)
 ;Expects sound_param_word_0 to contain song list address.
 ;Expects sound_param_word_1 to contain sfx list address.
 ;Expects sound_param_word_2 to contain envelopes list address.
@@ -87,6 +87,7 @@ sound_initialize:
     sta addr_dpcm_note_to_loop_pitch_index+1
     endif
 
+    ;Load PAL note table for PAL, NTSC for any other region.
     lda sound_region
     cmp #SOUND_REGION_PAL
     beq .pal
@@ -295,6 +296,11 @@ pal_note_table_hi:
     .db high($003A), high($0037), high($0034), high($0031), high($002E), high($002B), high($0029), high($0026), high($0024), high($0022), high($0020), high($001E)
     .db high($001D), high($001B), high($0019), high($0018), high($0016), high($0015), high($0014), high($0013), high($0012), high($0011), high($0010), high($000F)
     .db high($000E), high($000D), high($000C)
+
+;Maps NTSC to NTSC tempo, maps PAL and Dendy to
+;faster PAL tempo in song and sfx headers.
+sound_region_to_tempo_offset:
+    .db 0, 2, 2
 
 channel_callback_table_lo:
     .db low(square_1_play_note)
@@ -1258,6 +1264,7 @@ stream_terminate:
 ;Assumed to be four addresses to initialize streams on, for square1, square2, triangle and noise.
 ;Any addresses found to be zero will not initialize that channel.
 play_song:
+.tempo_offset = sound_local_byte_0
 
     ;Save index regs.
     tya
@@ -1266,6 +1273,11 @@ play_song:
     pha
 
     inc sound_disable_update
+
+    ;Select header tempo offset based on region.
+    ldx sound_region
+    lda sound_region_to_tempo_offset,x
+    sta .tempo_offset
 
     ;Get song address from song list.
     lda sound_param_byte_0
@@ -1299,7 +1311,7 @@ play_song:
 
     clc
     lda #track_header_ntsc_tempo_lo
-    adc sound_region
+    adc .tempo_offset
     tay
     lda [song_address],y
     sta stream_tempo_lo,x
@@ -1333,7 +1345,7 @@ play_song:
 
     clc
     lda #track_header_ntsc_tempo_lo
-    adc sound_region
+    adc .tempo_offset
     tay
     lda [song_address],y
     sta stream_tempo_lo,x
@@ -1367,7 +1379,7 @@ play_song:
 
     clc
     lda #track_header_ntsc_tempo_lo
-    adc sound_region
+    adc .tempo_offset
     tay
     lda [song_address],y
     sta stream_tempo_lo,x
@@ -1401,7 +1413,7 @@ play_song:
 
     clc
     lda #track_header_ntsc_tempo_lo
-    adc sound_region
+    adc .tempo_offset
     tay
     lda [song_address],y
     sta stream_tempo_lo,x
@@ -1439,7 +1451,7 @@ play_song:
 
     clc
     lda #track_header_ntsc_tempo_lo
-    adc sound_region
+    adc .tempo_offset
     tay
     lda [song_address],y
     sta stream_tempo_lo,x
@@ -1467,8 +1479,9 @@ play_song:
 ;be one of two values: soundeffect_one, and soundeffect_two from ggsound.inc..
 ;Assumes the parameters are correct; no range checking is performed.
 play_sfx:
-sfx_stream = sound_local_byte_0
-sfx_address = sound_local_word_0
+.sfx_stream = sound_local_byte_0
+.tempo_offset = sound_local_byte_1
+.sfx_address = sound_local_word_0
 
     ;Save index regs.
     tya
@@ -1478,53 +1491,58 @@ sfx_address = sound_local_word_0
 
     inc sound_disable_update
 
+    ;Select header tempo offset based on region.
+    ldx sound_region
+    lda sound_region_to_tempo_offset,x
+    sta .tempo_offset
+
     ;Get sfx address from sfx list.
     lda sound_param_byte_0
     asl a
     tay
     lda [sfx_list_address],y
-    sta sfx_address
+    sta .sfx_address
     iny
     lda [sfx_list_address],y
-    sta sfx_address+1
+    sta .sfx_address+1
 
     lda sound_param_byte_1
-    sta sfx_stream
+    sta .sfx_stream
 
     ;Load square 1 stream.
     ldy #track_header_square1_stream_address
-    lda [sfx_address],y
+    lda [.sfx_address],y
     sta sound_param_word_0
     iny
-    lda [sfx_address],y
+    lda [.sfx_address],y
     beq .no_square_1
     sta sound_param_word_0+1
 
     lda #0
     sta sound_param_byte_0
 
-    lda sfx_stream
+    lda .sfx_stream
     sta sound_param_byte_1
 
     jsr stream_initialize
 
-    ldx sfx_stream
+    ldx .sfx_stream
     clc
     lda #track_header_ntsc_tempo_lo
-    adc sound_region
+    adc .tempo_offset
     tay
-    lda [sfx_address],y
+    lda [.sfx_address],y
     sta stream_tempo_lo,x
     sta stream_tempo_counter_lo,x
     iny
-    lda [sfx_address],y
+    lda [.sfx_address],y
     sta stream_tempo_hi,x
     sta stream_tempo_counter_hi,x
 
-    inc sfx_stream
+    inc .sfx_stream
 .no_square_1:
 
-    lda sfx_stream
+    lda .sfx_stream
     cmp #(soundeffect_two + 1)
     bne .skip1
     jmp .no_more_sfx_streams_available
@@ -1532,38 +1550,38 @@ sfx_address = sound_local_word_0
 
     ;Load square 2 stream.
     ldy #track_header_square2_stream_address
-    lda [sfx_address],y
+    lda [.sfx_address],y
     sta sound_param_word_0
     iny
-    lda [sfx_address],y
+    lda [.sfx_address],y
     beq .no_square_2
     sta sound_param_word_0+1
 
     lda #1
     sta sound_param_byte_0
 
-    lda sfx_stream
+    lda .sfx_stream
     sta sound_param_byte_1
 
     jsr stream_initialize
 
-    ldx sfx_stream
+    ldx .sfx_stream
     clc
     lda #track_header_ntsc_tempo_lo
-    adc sound_region
+    adc .tempo_offset
     tay
-    lda [sfx_address],y
+    lda [.sfx_address],y
     sta stream_tempo_lo,x
     sta stream_tempo_counter_lo,x
     iny
-    lda [sfx_address],y
+    lda [.sfx_address],y
     sta stream_tempo_hi,x
     sta stream_tempo_counter_hi,x
 
-    inc sfx_stream
+    inc .sfx_stream
 .no_square_2:
 
-    lda sfx_stream
+    lda .sfx_stream
     cmp #(soundeffect_two + 1)
     bne .skip2
     jmp .no_more_sfx_streams_available
@@ -1571,103 +1589,103 @@ sfx_address = sound_local_word_0
 
     ;Load triangle stream.
     ldy #track_header_triangle_stream_address
-    lda [sfx_address],y
+    lda [.sfx_address],y
     sta sound_param_word_0
     iny
-    lda [sfx_address],y
+    lda [.sfx_address],y
     beq .no_triangle
     sta sound_param_word_0+1
 
     lda #2
     sta sound_param_byte_0
 
-    lda sfx_stream
+    lda .sfx_stream
     sta sound_param_byte_1
 
     jsr stream_initialize
 
-    ldx sfx_stream
+    ldx .sfx_stream
     clc
     lda #track_header_ntsc_tempo_lo
-    adc sound_region
+    adc .tempo_offset
     tay
-    lda [sfx_address],y
+    lda [.sfx_address],y
     sta stream_tempo_lo,x
     sta stream_tempo_counter_lo,x
     iny
-    lda [sfx_address],y
+    lda [.sfx_address],y
     sta stream_tempo_hi,x
     sta stream_tempo_counter_hi,x
 
-    inc sfx_stream
+    inc .sfx_stream
 .no_triangle:
 
-    lda sfx_stream
+    lda .sfx_stream
     cmp #(soundeffect_two + 1)
     beq .no_more_sfx_streams_available
 
     ;Load noise stream.
     ldy #track_header_noise_stream_address
-    lda [sfx_address],y
+    lda [.sfx_address],y
     sta sound_param_word_0
     iny
-    lda [sfx_address],y
+    lda [.sfx_address],y
     beq .no_noise
     sta sound_param_word_0+1
 
     lda #3
     sta sound_param_byte_0
 
-    lda sfx_stream
+    lda .sfx_stream
     sta sound_param_byte_1
 
     jsr stream_initialize
 
-    ldx sfx_stream
+    ldx .sfx_stream
     clc
     lda #track_header_ntsc_tempo_lo
-    adc sound_region
+    adc .tempo_offset
     tay
-    lda [sfx_address],y
+    lda [.sfx_address],y
     sta stream_tempo_lo,x
     sta stream_tempo_counter_lo,x
     iny
-    lda [sfx_address],y
+    lda [.sfx_address],y
     sta stream_tempo_hi,x
     sta stream_tempo_counter_hi,x
 
-    inc sfx_stream
+    inc .sfx_stream
 .no_noise:
 
     ifdef FEATURE_DPCM
     ;Load dpcm stream.
     ldy #track_header_dpcm_stream_address
-    lda [sfx_address],y
+    lda [.sfx_address],y
     sta sound_param_word_0
     iny
-    lda [sfx_address],y
+    lda [.sfx_address],y
     beq .no_dpcm
     sta sound_param_word_0+1
 
     lda #4
     sta sound_param_byte_0
 
-    lda sfx_stream
+    lda .sfx_stream
     sta sound_param_byte_1
 
     jsr stream_initialize
 
-    ldx sfx_stream
+    ldx .sfx_stream
     clc
     lda #track_header_ntsc_tempo_lo
-    adc sound_region
+    adc .tempo_offset
     tay
-    lda [sfx_address],y
+    lda [.sfx_address],y
     sta stream_tempo_lo,x
     sta stream_tempo_counter_lo,x
 
     iny
-    lda [sfx_address],y
+    lda [.sfx_address],y
     sta stream_tempo_hi,x
     sta stream_tempo_counter_hi,x
 

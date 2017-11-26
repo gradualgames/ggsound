@@ -58,7 +58,7 @@ currently supports:
 - Looping with the Bxx (must be present in all channels, using
 unique patterns) command
 - Note cuts
-- Tempo and pitch adjustment for NTSC and PAL
+- Tempo and pitch adjustment for NTSC, PAL and Dendy
 - Multi-song export
 - Sound effects on two channels
 - Pause/unpause
@@ -150,8 +150,7 @@ and macros.
 * ggsound.asm: Include this in a PRG-ROM bank which has enough
 space.
 
-* ggsound_zp.inc: Include this file within your zeropage enumer-
-ation, like this:
+* ggsound_zp.inc: Include this file within your zeropage enumeration, like this:
 
 ```
 .base $0000
@@ -240,13 +239,12 @@ python ft_txt_to_asm.py your_file.txt
 
 Then, you can examine the error output. Please email me if you
 end up in this situation---you have either encountered a bug or
-a limitation in ft_txt_to_asm.py. Known limitations are docu-
-mented below.
+a limitation in ft_txt_to_asm.py. Known limitations are documented below.
 
 # Limitations of ft_txt_to_asm.py
 
-ft_txt_to_asm.py does not convert your famitracker data verbat-
-im. It uses a subset of all the possible features you can use
+ft_txt_to_asm.py does not convert your famitracker data verbatim.
+It uses a subset of all the possible features you can use
 within a song. Here are a list of all the features that are
 currently supported:
 
@@ -329,13 +327,13 @@ DPCM data MUST be at $C000 or later or it will not work.
 ## Initialization:
 
 To initialize GGSound, you must call sound_initialize. You need
-to tell it which region to use (NTSC or PAL), and the addresses
+to tell it which region to use (NTSC, PAL, or Dendy), and the addresses
 of lists of songs, sound effects, envelopes and dpcm samples.
 These lists are located at the top of the asm file that you
 generate from your songs file with ft_txt_to_asm.py.
 
 ```
-    lda #SOUND_REGION_NTSC ;or #SOUND_REGION_PAL
+    lda #SOUND_REGION_NTSC ;or #SOUND_REGION_PAL, or #SOUND_REGION_DENDY
     sta sound_param_byte_0
     lda #<song_list
     sta sound_param_word_0

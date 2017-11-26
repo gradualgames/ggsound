@@ -1,4 +1,4 @@
-;Expects sound_param_byte_0 to contain desired region (SOUND_REGION_NTSC or SOUND_REGION_PAL)
+;Expects sound_param_byte_0 to contain desired region (SOUND_REGION_NTSC, SOUND_REGION_PAL, SOUND_REGION_DENDY)
 ;Expects sound_param_word_0 to contain song list address.
 ;Expects sound_param_word_1 to contain sfx list address.
 ;Expects sound_param_word_2 to contain envelopes list address.
@@ -87,6 +87,7 @@ sound_initialize:
     sta base_address_dpcm_note_to_loop_pitch_index+1
     endif
 
+    ;Load PAL note table for PAL, NTSC for any other region.
     lda sound_region
     cmp #SOUND_REGION_PAL
     beq @pal
@@ -294,6 +295,11 @@ pal_note_table_hi:
     .dh $003A, $0037, $0034, $0031, $002E, $002B, $0029, $0026, $0024, $0022, $0020, $001E
     .dh $001D, $001B, $0019, $0018, $0016, $0015, $0014, $0013, $0012, $0011, $0010, $000F
     .dh $000E, $000D, $000C
+
+;Maps NTSC to NTSC tempo, maps PAL and Dendy to
+;faster PAL tempo in song and sfx headers.
+sound_region_to_tempo_offset:
+    .db 0, 2, 2
 
 channel_callback_table_lo:
     .dl (square_1_play_note)
@@ -1255,6 +1261,7 @@ stream_terminate:
 ;Assumed to be four addresses to initialize streams on, for square1, square2, triangle and noise.
 ;Any addresses found to be zero will not initialize that channel.
 play_song:
+    tempo_offset = sound_local_byte_0
 
     ;Save index regs.
     tya
@@ -1263,6 +1270,11 @@ play_song:
     pha
 
     inc sound_disable_update
+
+    ;Select header tempo offset based on region.
+    ldx sound_region
+    lda sound_region_to_tempo_offset,x
+    sta tempo_offset
 
     ;Get song address from song list.
     lda sound_param_byte_0
@@ -1296,7 +1308,7 @@ play_song:
 
     clc
     lda #track_header_ntsc_tempo_lo
-    adc sound_region
+    adc tempo_offset
     tay
     lda (song_address),y
     sta stream_tempo_lo,x
@@ -1330,7 +1342,7 @@ play_song:
 
     clc
     lda #track_header_ntsc_tempo_lo
-    adc sound_region
+    adc tempo_offset
     tay
     lda (song_address),y
     sta stream_tempo_lo,x
@@ -1364,7 +1376,7 @@ play_song:
 
     clc
     lda #track_header_ntsc_tempo_lo
-    adc sound_region
+    adc tempo_offset
     tay
     lda (song_address),y
     sta stream_tempo_lo,x
@@ -1398,7 +1410,7 @@ play_song:
 
     clc
     lda #track_header_ntsc_tempo_lo
-    adc sound_region
+    adc tempo_offset
     tay
     lda (song_address),y
     sta stream_tempo_lo,x
@@ -1436,7 +1448,7 @@ play_song:
 
     clc
     lda #track_header_ntsc_tempo_lo
-    adc sound_region
+    adc tempo_offset
     tay
     lda (song_address),y
     sta stream_tempo_lo,x
@@ -1464,8 +1476,9 @@ play_song:
 ;be one of two values: soundeffect_one, and soundeffect_two from ggsound.inc.
 ;Assumes the parameters are correct; no range checking is performed.
 play_sfx:
-sfx_stream = sound_local_byte_0
-sfx_address = sound_local_word_0
+    sfx_stream = sound_local_byte_0
+    tempo_offset = sound_local_byte_1
+    sfx_address = sound_local_word_0
 
     ;Save index regs.
     tya
@@ -1474,6 +1487,11 @@ sfx_address = sound_local_word_0
     pha
 
     inc sound_disable_update
+
+    ;Select header tempo offset based on region.
+    ldx sound_region
+    lda sound_region_to_tempo_offset,x
+    sta tempo_offset
 
     ;Get sfx address from sfx list.
     lda sound_param_byte_0
@@ -1508,7 +1526,7 @@ sfx_address = sound_local_word_0
     ldx sfx_stream
     clc
     lda #track_header_ntsc_tempo_lo
-    adc sound_region
+    adc tempo_offset
     tay
     lda (sfx_address),y
     sta stream_tempo_lo,x
@@ -1547,7 +1565,7 @@ sfx_address = sound_local_word_0
     ldx sfx_stream
     clc
     lda #track_header_ntsc_tempo_lo
-    adc sound_region
+    adc tempo_offset
     tay
     lda (sfx_address),y
     sta stream_tempo_lo,x
@@ -1586,7 +1604,7 @@ sfx_address = sound_local_word_0
     ldx sfx_stream
     clc
     lda #track_header_ntsc_tempo_lo
-    adc sound_region
+    adc tempo_offset
     tay
     lda (sfx_address),y
     sta stream_tempo_lo,x
@@ -1623,7 +1641,7 @@ sfx_address = sound_local_word_0
     ldx sfx_stream
     clc
     lda #track_header_ntsc_tempo_lo
-    adc sound_region
+    adc tempo_offset
     tay
     lda (sfx_address),y
     sta stream_tempo_lo,x
@@ -1657,7 +1675,7 @@ sfx_address = sound_local_word_0
     ldx sfx_stream
     clc
     lda #track_header_ntsc_tempo_lo
-    adc sound_region
+    adc tempo_offset
     tay
     lda (sfx_address),y
     sta stream_tempo_lo,x

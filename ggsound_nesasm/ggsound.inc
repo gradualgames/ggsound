@@ -203,9 +203,10 @@ STREAM_PITCH_LOADED_CLEAR = %11110111
 ;default tempo.
 DEFAULT_TEMPO = 256 * 15
 
-;These end up incrementing an offset when reading track headers
+;Region constants.
 SOUND_REGION_NTSC = 0
-SOUND_REGION_PAL  = 2
+SOUND_REGION_PAL  = 1
+SOUND_REGION_DENDY = 2
 
 track_header_ntsc_tempo_lo            = 0
 track_header_ntsc_tempo_hi            = 1
