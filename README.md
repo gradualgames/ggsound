@@ -92,6 +92,8 @@ GGSound and the converter.
 help exercise GGSound and the converter.
 * Peter McQuillan - For bug reports and supplying sample songs
 to help exercise GGSound and the converter.
+* Famicuber - For bug reports and supplying sample songs to
+exercise GGSound.
 
 # Changes:
 * 1-14-18: Fixed bug in arpeggio execution for square and
