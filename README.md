@@ -96,6 +96,7 @@ to help exercise GGSound and the converter.
 # Changes:
 * 1-14-18: Fixed bug in arpeggio execution for square and
            triangle channels.
+           Added arpeggio support for the noise channel.
 * 6-4-17:  Added pitch envelope support for the noise channel.
            Note that FamiTracker appears to stop at note 0
            even if the delta continues down, but wraps after

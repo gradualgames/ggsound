@@ -924,10 +924,87 @@ pitch_stop:
 
 .proc noise_play_note
 
+    .ifdef FEATURE_ARPEGGIOS
+    ;Load arpeggio index.
+    lda stream_arpeggio_index,x
+    asl
+    tay
+    ;Load arpeggio address.
+    lda (base_address_arpeggio_envelopes),y
+    sta sound_local_word_0
+    iny
+    lda (base_address_arpeggio_envelopes),y
+    sta sound_local_word_0+1
+
+    ldy stream_arpeggio_offset,x
+
+    .scope
+    lda (sound_local_word_0),y
+    cmp #ENV_STOP
+    beq arpeggio_stop
+    cmp #ENV_LOOP
+    beq arpeggio_loop
+arpeggio_play:
+
+    ;We're changing notes.
+    lda stream_flags,x
+    and #STREAM_PITCH_LOADED_CLEAR
+    sta stream_flags,x
+
+    ;Load the current arpeggio value and use it as the current note.
+    clc
+    lda (sound_local_word_0),y
+    and #%01111111
+    sta sound_local_byte_0
+    ;Advance arpeggio offset.
+    inc stream_arpeggio_offset,x
+
+    jmp done
+arpeggio_stop:
+
+    ;On noise, when an arpeggio is done, we're changing notes to the
+    ;currently playing note. (This is FamiTracker's behavior)
+    lda stream_flags,x
+    and #STREAM_PITCH_LOADED_CLEAR
+    sta stream_flags,x
+
     ;Load note index. (really more of a "sound type" for noise)
     lda stream_byte
     and #%01111111
     sta sound_local_byte_0
+
+    jmp done
+arpeggio_loop:
+
+    ;We hit a loop opcode, advance envelope index and load loop point.
+    iny
+    lda (sound_local_word_0),y
+    sta stream_arpeggio_offset,x
+    tay
+
+    ;We're changing notes.
+    lda stream_flags,x
+    and #STREAM_PITCH_LOADED_CLEAR
+    sta stream_flags,x
+
+    ;Load the current arpeggio value and use it as the current note.
+    clc
+    lda (sound_local_word_0),y
+    and #%01111111
+    sta sound_local_byte_0
+    ;Advance arpeggio offset.
+    inc stream_arpeggio_offset,x
+done:
+    .endscope
+
+    .else
+
+    ;Load note index. (really more of a "sound type" for noise)
+    lda stream_byte
+    and #%01111111
+    sta sound_local_byte_0
+
+    .endif
 
     ;Skip loading note pitch if already loaded, to allow envelopes
     ;to modify the pitch.
