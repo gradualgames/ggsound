@@ -1914,6 +1914,10 @@ read_address = sound_local_word_1
     sta stream_volume_offset,x
     sta stream_pitch_offset,x
     sta stream_duty_offset,x
+    ifdef FEATURE_ARPEGGIOS
+    ;Reset arpeggio offset.
+    sta stream_arpeggio_offset,x
+    endif
 
     ;Reset silence until note and pitch loaded flags.
     lda stream_flags,x
