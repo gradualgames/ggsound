@@ -135,7 +135,7 @@ arpeggio1:
 arpeggio2:
   .db 0,3,6,12,ENV_LOOP,0
 arpeggio3:
-  .db 0,ENV_STOP
+  .db ENV_STOP
 
 pitch0:
   .db 12,12,12,12,12,12,12,12,12,12,ENV_STOP

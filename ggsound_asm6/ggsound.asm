@@ -866,9 +866,14 @@ noise_play_note:
 
     ;On noise, when an arpeggio is done, we're changing notes to the
     ;currently playing note. (This is FamiTracker's behavior)
+    ;However, we only do this if we're stopping at any point other
+    ;than zero, which indicates an arpeggio did in fact execute.
+    lda stream_arpeggio_offset,x
+    beq @skip_clear_pitch_loaded
     lda stream_flags,x
     and #STREAM_PITCH_LOADED_CLEAR
     sta stream_flags,x
+@skip_clear_pitch_loaded:
 
     ;Load note index. (really more of a "sound type" for noise)
     lda stream_byte

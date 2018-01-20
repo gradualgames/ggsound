@@ -490,7 +490,7 @@ def main():
     macro["type"] = 1
     default_arpeggio_index = len(macros["arpeggio"])
     macro["index"] = default_arpeggio_index
-    macro["values"] = [0]
+    macro["values"] = []
     macro["loop_point"] = -1
     macros["arpeggio"].append(macro)
 

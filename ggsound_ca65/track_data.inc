@@ -122,7 +122,7 @@ arpeggio1:
 arpeggio2:
   .byte 0,3,6,12,ENV_LOOP,0
 arpeggio3:
-  .byte 0,ENV_STOP
+  .byte ENV_STOP
 
 pitch0:
   .byte 12,12,12,12,12,12,12,12,12,12,ENV_STOP

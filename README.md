@@ -96,6 +96,11 @@ to help exercise GGSound and the converter.
 exercise GGSound.
 
 # Changes:
+# 1-20-18: Fixed regression from noise arpeggio execution which
+           would prevent noise pitch envelopes from executing.
+           This bug included fixes in ft_txt_to_asm.py and in
+           ggsound itself. Please re-convert your song data if
+           you have run into this issue.
 * 1-14-18: Fixed bug in arpeggio execution for square and
            triangle channels.
            Added arpeggio support for the noise channel.
