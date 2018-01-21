@@ -241,9 +241,9 @@ skipb:
 
     inc current_song
     lda current_song
-    cmp #6
+    cmp #7
     bne +
-    lda #5
+    lda #6
     sta current_song
 +
 

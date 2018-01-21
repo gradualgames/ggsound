@@ -52,6 +52,8 @@ currently supports:
 
 - Square 1, 2, Triangle, Noise, and DPCM channels
 - Volume, Arpeggio, Pitch and Duty envelopes
+- Arpeggios are absolute on all channels but noise, where they
+are fixed.
 - Hi-Pitch envelopes are NOT supported
 - Looping envelopes at an arbitrary loop point
 - Speed and Tempo
@@ -101,6 +103,9 @@ exercise GGSound.
            This bug included fixes in ft_txt_to_asm.py and in
            ggsound itself. Please re-convert your song data if
            you have run into this issue.
+           Added Famicuber's drum loop to songs.ftm demonstrating
+           noise arpeggios working alongside noise pitch envelopes
+           (one of the sfx in the demo)
 * 1-14-18: Fixed bug in arpeggio execution for square and
            triangle channels.
            Added arpeggio support for the noise channel.
@@ -273,6 +278,8 @@ THESE MUST BE IN *UNIQUE* PATTERNS.
 to use them by setting ARPEGGIOS_ENABLED = False within
 ft_txt_to_asm.py, at the top of the file. Just open it in a text
 editor.
+- Arpeggios are absolute on all channels but noise, where they
+are fixed.
 - pitch envelopes
 - hi-pitch envelopes are NOT supported
 - duty envelopes

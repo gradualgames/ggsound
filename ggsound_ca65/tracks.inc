@@ -6,7 +6,7 @@ TRACKS_INC = 1
 .global envelopes_list
 .global dpcm_list
 
-MAX_TRACKS = 6
+MAX_TRACKS = 7
 
 song_index_robot_adv = 0
 song_index_k466 = 1
@@ -14,6 +14,7 @@ song_index_k11 = 2
 song_index_soler42 = 3
 song_index_antagonist = 4
 song_index_arps = 5
+song_index_noise_arps = 6
 
 sfx_index_sfx_shot = 0
 sfx_index_sfx_laser = 1

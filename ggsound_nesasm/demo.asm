@@ -244,9 +244,9 @@ main_loop:
 
     inc current_song
     lda current_song
-    cmp #6
+    cmp #7
     bne .skipcap
-    lda #5
+    lda #6
     sta current_song
 .skipcap:
 
