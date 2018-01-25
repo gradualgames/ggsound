@@ -37,8 +37,6 @@ base_address_dpcm_note_to_sample_length: .res 2
 base_address_dpcm_note_to_loop_pitch_index: .res 2
 .endif
 
-stream_byte: .res 1
-
 apu_data_ready: .res 1
 apu_square_1_old: .res 1
 apu_square_2_old: .res 1
@@ -54,6 +52,7 @@ apu_register_sets: .res 20
 .segment "BSS"
 
 stream_flags:                  .res MAX_STREAMS
+stream_note:                   .res MAX_STREAMS
 stream_note_length_lo:         .res MAX_STREAMS
 stream_note_length_hi:         .res MAX_STREAMS
 stream_note_length_counter_lo: .res MAX_STREAMS
@@ -436,6 +435,16 @@ channel_callback_table_hi: .hibytes channel_callback_table
     stream_terminate, \
     stream_set_arpeggio_envelope
 
+arpeggio_callback_table_lo:
+    .byte <(arpeggio_absolute-1)
+    .byte <(arpeggio_fixed-1)
+    .byte <(arpeggio_relative-1)
+
+arpeggio_callback_table_hi:
+    .byte >(arpeggio_absolute-1)
+    .byte >(arpeggio_fixed-1)
+    .byte >(arpeggio_relative-1)
+
 .else
 
 .define stream_callback_table \
@@ -493,62 +502,26 @@ stream_callback_table_hi: .hibytes stream_callback_table
     lda (base_address_arpeggio_envelopes),y
     sta sound_local_word_0+1
 
-    ldy stream_arpeggio_offset,x
-
-    .scope
+    ;Get arpeggio type.
+    ldy #0
     lda (sound_local_word_0),y
-    cmp #ENV_STOP
-    beq arpeggio_stop
-    cmp #ENV_LOOP
-    beq arpeggio_loop
-arpeggio_play:
-
-    ;We're changing notes.
-    lda stream_flags,x
-    and #STREAM_PITCH_LOADED_CLEAR
-    sta stream_flags,x
-
-    ;Load the current arpeggio value and add it to current note.
-    clc
-    lda (sound_local_word_0),y
-    adc stream_byte
-    tay
-    ;Advance arpeggio offset.
-    inc stream_arpeggio_offset,x
-
-    jmp done
-arpeggio_stop:
-
-    ;Just load the current note.
-    ldy stream_byte
-
-    jmp done
-arpeggio_loop:
-
-    ;We hit a loop opcode, advance envelope index and load loop point.
-    iny
-    lda (sound_local_word_0),y
-    sta stream_arpeggio_offset,x
     tay
 
-    ;We're changing notes.
-    lda stream_flags,x
-    and #STREAM_PITCH_LOADED_CLEAR
-    sta stream_flags,x
-
-    ;Load the current arpeggio value and add it to current note.
-    clc
-    lda (sound_local_word_0),y
-    adc stream_byte
-    tay
-    ;Advance arpeggio offset.
-    inc stream_arpeggio_offset,x
-done:
-    .endscope
+    ;Get the address.
+    lda #>(return_from_arpeggio_callback-1)
+    pha
+    lda #<(return_from_arpeggio_callback-1)
+    pha
+    lda arpeggio_callback_table_hi,y
+    pha
+    lda arpeggio_callback_table_lo,y
+    pha
+    rts
+    return_from_arpeggio_callback:
 
     .else
 
-    ldy stream_byte
+    ldy stream_note,x
 
     .endif
 
@@ -764,7 +737,7 @@ arpeggio_play:
     ;Load the current arpeggio value and add it to current note.
     clc
     lda (sound_local_word_0),y
-    adc stream_byte
+    adc stream_note,x
     tay
     ;Advance arpeggio offset.
     inc stream_arpeggio_offset,x
@@ -773,7 +746,7 @@ arpeggio_play:
 arpeggio_stop:
 
     ;Just load the current note.
-    ldy stream_byte
+    ldy stream_note,x
 
     jmp done
 arpeggio_loop:
@@ -792,7 +765,7 @@ arpeggio_loop:
     ;Load the current arpeggio value and add it to current note.
     clc
     lda (sound_local_word_0),y
-    adc stream_byte
+    adc stream_note,x
     tay
     ;Advance arpeggio offset.
     inc stream_arpeggio_offset,x
@@ -801,7 +774,7 @@ done:
 
     .else
 
-    ldy stream_byte
+    ldy stream_note,x
 
     .endif
 
@@ -936,80 +909,32 @@ pitch_stop:
     lda (base_address_arpeggio_envelopes),y
     sta sound_local_word_0+1
 
-    ldy stream_arpeggio_offset,x
-
-    .scope
+    ;Get arpeggio type.
+    ldy #0
     lda (sound_local_word_0),y
-    cmp #ENV_STOP
-    beq arpeggio_stop
-    cmp #ENV_LOOP
-    beq arpeggio_loop
-arpeggio_play:
-
-    ;We're changing notes.
-    lda stream_flags,x
-    and #STREAM_PITCH_LOADED_CLEAR
-    sta stream_flags,x
-
-    ;Load the current arpeggio value and use it as the current note.
-    clc
-    lda (sound_local_word_0),y
-    and #%01111111
-    sta sound_local_byte_0
-    ;Advance arpeggio offset.
-    inc stream_arpeggio_offset,x
-
-    jmp done
-arpeggio_stop:
-
-    ;On noise, when an arpeggio is done, we're changing notes to the
-    ;currently playing note. (This is FamiTracker's behavior)
-    ;However, we only do this if we're stopping at any point other
-    ;than zero, which indicates an arpeggio did in fact execute.
-    lda stream_arpeggio_offset,x
-    beq skip_clear_pitch_loaded
-    lda stream_flags,x
-    and #STREAM_PITCH_LOADED_CLEAR
-    sta stream_flags,x
-skip_clear_pitch_loaded:
-
-    ;Load note index. (really more of a "sound type" for noise)
-    lda stream_byte
-    and #%01111111
-    sta sound_local_byte_0
-
-    jmp done
-arpeggio_loop:
-
-    ;We hit a loop opcode, advance envelope index and load loop point.
-    iny
-    lda (sound_local_word_0),y
-    sta stream_arpeggio_offset,x
     tay
 
-    ;We're changing notes.
-    lda stream_flags,x
-    and #STREAM_PITCH_LOADED_CLEAR
-    sta stream_flags,x
-
-    ;Load the current arpeggio value and use it as the current note.
-    clc
-    lda (sound_local_word_0),y
-    and #%01111111
-    sta sound_local_byte_0
-    ;Advance arpeggio offset.
-    inc stream_arpeggio_offset,x
-done:
-    .endscope
+    ;Get the address.
+    lda #>(return_from_arpeggio_callback-1)
+    pha
+    lda #<(return_from_arpeggio_callback-1)
+    pha
+    lda arpeggio_callback_table_hi,y
+    pha
+    lda arpeggio_callback_table_lo,y
+    pha
+    rts
+    return_from_arpeggio_callback:
 
     .else
 
-    ;Load note index. (really more of a "sound type" for noise)
-    lda stream_byte
-    and #%01111111
-    sta sound_local_byte_0
+    ldy stream_note,x
 
     .endif
+
+    tya
+    and #%01111111
+    sta sound_local_byte_0
 
     ;Skip loading note pitch if already loaded, to allow envelopes
     ;to modify the pitch.
@@ -1166,7 +1091,7 @@ duty_stop:
     bne note_already_played
 
     ;Load note index.
-    ldy stream_byte
+    ldy stream_note,x
 
     ;Get sample index.
     lda (base_address_dpcm_note_to_sample_index),y
@@ -1178,7 +1103,7 @@ duty_stop:
     sta stream_channel_register_3,x
 
     ;Get loop and pitch from dpcm_note_to_loop_pitch_index table.
-    ldy stream_byte
+    ldy stream_note,x
     lda (base_address_dpcm_note_to_loop_pitch_index),y
     sta stream_channel_register_1,x
 
@@ -1205,6 +1130,195 @@ note_already_played:
     rts
 
 .endproc
+.endif
+
+.ifdef FEATURE_ARPEGGIOS
+
+.proc arpeggio_absolute
+
+    ldy stream_arpeggio_offset,x
+
+    lda (sound_local_word_0),y
+    cmp #ENV_STOP
+    beq arpeggio_stop
+    cmp #ENV_LOOP
+    beq arpeggio_loop
+arpeggio_play:
+
+    ;We're changing notes.
+    lda stream_flags,x
+    and #STREAM_PITCH_LOADED_CLEAR
+    sta stream_flags,x
+
+    ;Load the current arpeggio value and add it to current note.
+    clc
+    lda (sound_local_word_0),y
+    adc stream_note,x
+    tay
+    ;Advance arpeggio offset.
+    inc stream_arpeggio_offset,x
+
+    jmp done
+arpeggio_stop:
+
+    ;Just load the current note.
+    ldy stream_note,x
+
+    jmp done
+arpeggio_loop:
+
+    ;We hit a loop opcode, advance envelope index and load loop point.
+    iny
+    lda (sound_local_word_0),y
+    sta stream_arpeggio_offset,x
+    tay
+
+    ;We're changing notes.
+    lda stream_flags,x
+    and #STREAM_PITCH_LOADED_CLEAR
+    sta stream_flags,x
+
+    ;Load the current arpeggio value and add it to current note.
+    clc
+    lda (sound_local_word_0),y
+    adc stream_note,x
+    tay
+    ;Advance arpeggio offset.
+    inc stream_arpeggio_offset,x
+done:
+
+    rts
+
+.endproc
+
+.proc arpeggio_fixed
+
+    ldy stream_arpeggio_offset,x
+
+    lda (sound_local_word_0),y
+    cmp #ENV_STOP
+    beq arpeggio_stop
+    cmp #ENV_LOOP
+    beq arpeggio_loop
+arpeggio_play:
+
+    ;We're changing notes.
+    lda stream_flags,x
+    and #STREAM_PITCH_LOADED_CLEAR
+    sta stream_flags,x
+
+    ;Load the current arpeggio value and use it as the current note.
+    lda (sound_local_word_0),y
+    ;sta stream_note,x
+    tay
+    ;Advance arpeggio offset.
+    inc stream_arpeggio_offset,x
+
+    jmp done
+arpeggio_stop:
+
+    ;When a fixed arpeggio is done, we're changing notes to the
+    ;currently playing note. (This is FamiTracker's behavior)
+    ;However, we only do this if we're stopping at any point other
+    ;than one, which indicates an arpeggio did in fact execute.
+    lda stream_arpeggio_offset,x
+    cmp #1
+    beq skip_clear_pitch_loaded
+    lda stream_flags,x
+    and #STREAM_PITCH_LOADED_CLEAR
+    sta stream_flags,x
+skip_clear_pitch_loaded:
+
+    ;Just load the current note.
+    ldy stream_note,x
+
+    jmp done
+arpeggio_loop:
+
+    ;We hit a loop opcode, advance envelope index and load loop point.
+    iny
+    lda (sound_local_word_0),y
+    sta stream_arpeggio_offset,x
+    tay
+
+    ;We're changing notes.
+    lda stream_flags,x
+    and #STREAM_PITCH_LOADED_CLEAR
+    sta stream_flags,x
+
+    ;Load the current arpeggio value and use it as the current note.
+    lda (sound_local_word_0),y
+    tay
+    ;Advance arpeggio offset.
+    inc stream_arpeggio_offset,x
+done:
+
+    rts
+
+.endproc
+
+.proc arpeggio_relative
+
+    ldy stream_arpeggio_offset,x
+
+    lda (sound_local_word_0),y
+    cmp #ENV_STOP
+    beq arpeggio_stop
+    cmp #ENV_LOOP
+    beq arpeggio_loop
+arpeggio_play:
+
+    ;We're changing notes.
+    lda stream_flags,x
+    and #STREAM_PITCH_LOADED_CLEAR
+    sta stream_flags,x
+
+    ;Load the current arpeggio value and add it to current note.
+    clc
+    lda (sound_local_word_0),y
+    adc stream_note,x
+    cmp #HIGHEST_NOTE
+    bmi :+
+    lda #HIGHEST_NOTE
+    :
+    sta stream_note,x
+    tay
+    ;Advance arpeggio offset.
+    inc stream_arpeggio_offset,x
+
+    jmp done
+arpeggio_stop:
+
+    ;Just load the current note.
+    ldy stream_note,x
+
+    jmp done
+arpeggio_loop:
+
+    ;We hit a loop opcode, advance envelope index and load loop point.
+    iny
+    lda (sound_local_word_0),y
+    sta stream_arpeggio_offset,x
+    tay
+
+    ;We're changing notes.
+    lda stream_flags,x
+    and #STREAM_PITCH_LOADED_CLEAR
+    sta stream_flags,x
+
+    ;Load the current arpeggio value and add it to current note.
+    clc
+    lda (sound_local_word_0),y
+    adc stream_note,x
+    tay
+    ;Advance arpeggio offset.
+    inc stream_arpeggio_offset,x
+done:
+
+    rts
+
+.endproc
+
 .endif
 
 ;****************************************************************
@@ -1242,7 +1356,8 @@ note_already_played:
     ldy #0
     lda (sound_local_word_0),y
     sta stream_arpeggio_index,x
-    lda #0
+    ;Set arpeggio offset to 1 because index 0 contains arpeggio type.
+    lda #1
     sta stream_arpeggio_offset,x
 
     rts
@@ -1292,7 +1407,7 @@ note_already_played:
 
     ;determine note length from opcode
     sec
-    lda stream_byte
+    lda stream_note,x
     sbc #OPCODES_BASE
     clc
     adc #1
@@ -1989,6 +2104,8 @@ starting_read_address = sound_param_word_0
     sta stream_duty_offset,x
     .ifdef FEATURE_ARPEGGIOS
     sta stream_arpeggio_index,x
+    ;Set arpeggio offset to 1 because index 0 contains arpeggio type.
+    lda #1
     sta stream_arpeggio_offset,x
     .endif
 
@@ -2059,9 +2176,13 @@ read_address = sound_local_word_1
     sta read_address+1
 
     ;Load next byte from stream data.
+    lda stream_flags,x
+    and #STREAM_PITCH_LOADED_TEST
+    bne :+
     ldy #0
     lda (read_address),y
-    sta stream_byte
+    sta stream_note,x
+    :
 
     ;Is this byte a note or a stream opcode?
     cmp #OPCODES_BASE
@@ -2125,7 +2246,8 @@ process_note:
     sta stream_pitch_offset,x
     sta stream_duty_offset,x
     .ifdef FEATURE_ARPEGGIOS
-    ;Reset arpeggio offset.
+    ;Set arpeggio offset to 1 because index 0 contains arpeggio type.
+    lda #1
     sta stream_arpeggio_offset,x
     .endif
 

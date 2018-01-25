@@ -165,6 +165,8 @@ A7  = 84
 AS7 = 85
 B7  = 86
 
+HIGHEST_NOTE = B7
+
 OPCODES_BASE = 87
 
 ;stream control opcodes
@@ -229,6 +231,12 @@ ENV_LOOP = %01111111 ; 127
 ;preventing users from using that setting.
 DUTY_ENV_STOP = %00111111
 DUTY_ENV_LOOP = %00101010
+
+;these opcodes exist at the start of any arpeggio envelope to indicate
+;how the arpeggio is to be executed.
+ARP_TYPE_ABSOLUTE = 0
+ARP_TYPE_FIXED    = 1
+ARP_TYPE_RELATIVE = 2
 
 ;values for stream flags
 STREAM_ACTIVE_SET         = %00000001

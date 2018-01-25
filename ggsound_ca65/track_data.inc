@@ -128,17 +128,17 @@ volume22:
   .byte 0,ENV_STOP
 
 arpeggio0:
-  .byte 0,3,7,12,ENV_LOOP,0
+  .byte ARP_TYPE_ABSOLUTE,0,3,7,12,ENV_LOOP,1
 arpeggio1:
-  .byte 0,4,7,12,ENV_LOOP,0
+  .byte ARP_TYPE_ABSOLUTE,0,4,7,12,ENV_LOOP,1
 arpeggio2:
-  .byte 0,3,6,12,ENV_LOOP,0
+  .byte ARP_TYPE_ABSOLUTE,0,3,6,12,ENV_LOOP,1
 arpeggio3:
-  .byte 7,ENV_STOP
+  .byte ARP_TYPE_FIXED,7,ENV_STOP
 arpeggio4:
-  .byte 0,1,2,3,4,5,6,7,8,ENV_STOP
+  .byte ARP_TYPE_FIXED,0,1,2,3,4,5,6,7,8,ENV_STOP
 arpeggio5:
-  .byte ENV_STOP
+  .byte ARP_TYPE_ABSOLUTE,ENV_STOP
 
 pitch0:
   .byte 12,12,12,12,12,12,12,12,12,12,ENV_STOP
