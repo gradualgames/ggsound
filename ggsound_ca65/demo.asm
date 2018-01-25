@@ -12,7 +12,6 @@
 .include "ram.inc"
 .include "ggsound.inc"
 .include "tracks.inc"
-.include "ggsound.inc"
 .include "controller.inc"
 
 .segment "HEADER"

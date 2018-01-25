@@ -474,7 +474,7 @@ def main():
                 key_dpcm["sample_index"] = int(split_line[4])
                 key_dpcm["pitch_index"] = int(split_line[5])
                 key_dpcm["loop"] = int(split_line[6])
-                note = (key_dpcm["octave"] * 12 + key_dpcm["semitone"]) - 9
+                note = (key_dpcm["octave"] * 12 + key_dpcm["semitone"])
                 key_dpcms[note] = key_dpcm
 
     #At this point, we've gathered all of the exported song data and we're ready
@@ -643,7 +643,7 @@ def main():
             dpcm_note_to_sample_indices = []
             dpcm_note_to_sample_lengths = []
             dpcm_note_to_loop_pitch_indices = []
-            for note in range(0, 87):
+            for note in range(0, 95):
                 dpcm_note_to_sample_index = -1
                 dpcm_note_to_sample_length = -1
                 dpcm_note_to_loop_pitch_index = -1

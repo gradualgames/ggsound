@@ -4,6 +4,7 @@
 
 .segment "CODE"
 
+.align 64
 .include "track_dpcm.inc"
 
 .segment "ROM0"
