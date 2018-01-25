@@ -176,7 +176,7 @@ B7  = 95
 
 HIGHEST_NOTE = B7
 
-OPCODES_BASE = 87
+OPCODES_BASE = 96
 
 ;stream control opcodes
 
