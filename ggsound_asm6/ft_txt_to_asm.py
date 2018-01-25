@@ -18,6 +18,9 @@ macro_type_to_str = {0: "volume",
                      1: "arpeggio",
                      2: "pitch",
                      4: "duty"}
+arpeggio_sub_type_to_str = {0: "ARP_TYPE_ABSOLUTE",
+                            1: "ARP_TYPE_FIXED",
+                            2: "ARP_TYPE_RELATIVE"}
 silent_volume_index = None
 default_arpeggio_index = None
 flat_pitch_index = None
@@ -363,6 +366,7 @@ def main():
                 macro = {}
                 macro["type"] = int(type_index[1])
                 macro["loop_point"] = int(type_index[3])
+                macro["sub_type"] = int(type_index[5])
                 macro["values"] = [int(value) for value in values]
                 macros[macro_type_to_str[macro["type"]]].append(macro)
 
@@ -470,7 +474,7 @@ def main():
                 key_dpcm["sample_index"] = int(split_line[4])
                 key_dpcm["pitch_index"] = int(split_line[5])
                 key_dpcm["loop"] = int(split_line[6])
-                note = (key_dpcm["octave"] * 12 + key_dpcm["semitone"]) - 9
+                note = (key_dpcm["octave"] * 12 + key_dpcm["semitone"])
                 key_dpcms[note] = key_dpcm
 
     #At this point, we've gathered all of the exported song data and we're ready
@@ -483,6 +487,7 @@ def main():
     macro["index"] = silent_volume_index
     macro["values"] = [0]
     macro["loop_point"] = -1
+    macro["sub_type"] = 0
     macros["volume"].append(macro)
 
     #add default arpeggio macro.
@@ -492,6 +497,7 @@ def main():
     macro["index"] = default_arpeggio_index
     macro["values"] = []
     macro["loop_point"] = -1
+    macro["sub_type"] = 0
     macros["arpeggio"].append(macro)
 
     #add default flat pitch envelope for instruments that don't specify a pitch envelope
@@ -501,6 +507,7 @@ def main():
     macro["index"] = flat_pitch_index
     macro["values"] = [0]
     macro["loop_point"] = -1
+    macro["sub_type"] = 0
     macros["pitch"].append(macro)
 
     #add a standard duty envelope for instruments that don't specify a duty envelope
@@ -510,6 +517,7 @@ def main():
     macro["index"] = default_duty_index
     macro["values"] = [0]
     macro["loop_point"] = -1
+    macro["sub_type"] = 0
     macros["duty"].append(macro)
 
     #generate dpcm sample file, if we have any dpcm samples
@@ -597,11 +605,16 @@ def main():
             for macro in macros[env]:
                 f.write(env + str(macro["index"]) + ":\n")
                 f.write("%s" % define_byte_directive)
+                if env == "arpeggio":
+                    arp_type_code = arpeggio_sub_type_to_str[macro["sub_type"]]
+                    f.write("%s," % arp_type_code)
                 for value in macro["values"]:
                     f.write(str(value) + ",")
                 if macro["loop_point"] == -1:
                     f.write("ENV_STOP\n")
                 else:
+                    if env == "arpeggio":
+                        macro["loop_point"] = macro["loop_point"] + 1
                     f.write("ENV_LOOP,%s\n" % macro["loop_point"])
             f.write("\n")
 
@@ -630,7 +643,7 @@ def main():
             dpcm_note_to_sample_indices = []
             dpcm_note_to_sample_lengths = []
             dpcm_note_to_loop_pitch_indices = []
-            for note in range(0, 87):
+            for note in range(0, 95):
                 dpcm_note_to_sample_index = -1
                 dpcm_note_to_sample_length = -1
                 dpcm_note_to_loop_pitch_index = -1
