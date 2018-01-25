@@ -34,7 +34,6 @@ FEATURE_ARPEGGIOS = 1
 .globalzp base_address_dpcm_note_to_sample_length
 .globalzp base_address_dpcm_note_to_loop_pitch_index
 .endif
-.globalzp stream_byte
 .globalzp song_address
 
 .global sound_initialize
