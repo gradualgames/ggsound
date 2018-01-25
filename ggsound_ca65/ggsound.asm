@@ -719,58 +719,22 @@ square_2_play_note = square_1_play_note
     lda (base_address_arpeggio_envelopes),y
     sta sound_local_word_0+1
 
-    ldy stream_arpeggio_offset,x
-
-    .scope
+    ;Get arpeggio type.
+    ldy #0
     lda (sound_local_word_0),y
-    cmp #ENV_STOP
-    beq arpeggio_stop
-    cmp #ENV_LOOP
-    beq arpeggio_loop
-arpeggio_play:
-
-    ;We're changing notes.
-    lda stream_flags,x
-    and #STREAM_PITCH_LOADED_CLEAR
-    sta stream_flags,x
-
-    ;Load the current arpeggio value and add it to current note.
-    clc
-    lda (sound_local_word_0),y
-    adc stream_note,x
-    tay
-    ;Advance arpeggio offset.
-    inc stream_arpeggio_offset,x
-
-    jmp done
-arpeggio_stop:
-
-    ;Just load the current note.
-    ldy stream_note,x
-
-    jmp done
-arpeggio_loop:
-
-    ;We hit a loop opcode, advance envelope index and load loop point.
-    iny
-    lda (sound_local_word_0),y
-    sta stream_arpeggio_offset,x
     tay
 
-    ;We're changing notes.
-    lda stream_flags,x
-    and #STREAM_PITCH_LOADED_CLEAR
-    sta stream_flags,x
-
-    ;Load the current arpeggio value and add it to current note.
-    clc
-    lda (sound_local_word_0),y
-    adc stream_note,x
-    tay
-    ;Advance arpeggio offset.
-    inc stream_arpeggio_offset,x
-done:
-    .endscope
+    ;Get the address.
+    lda #>(return_from_arpeggio_callback-1)
+    pha
+    lda #<(return_from_arpeggio_callback-1)
+    pha
+    lda arpeggio_callback_table_hi,y
+    pha
+    lda arpeggio_callback_table_lo,y
+    pha
+    rts
+    return_from_arpeggio_callback:
 
     .else
 
