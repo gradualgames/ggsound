@@ -1,4 +1,5 @@
 stream_flags:                  .dsb MAX_STREAMS
+stream_note:                   .dsb MAX_STREAMS
 stream_note_length_lo:         .dsb MAX_STREAMS
 stream_note_length_hi:         .dsb MAX_STREAMS
 stream_note_length_counter_lo: .dsb MAX_STREAMS

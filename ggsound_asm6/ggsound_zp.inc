@@ -32,8 +32,6 @@ base_address_dpcm_note_to_sample_length: .dsb 2
 base_address_dpcm_note_to_loop_pitch_index: .dsb 2
 endif
 
-stream_byte: .dsb 1
-
 apu_data_ready: .dsb 1
 apu_square_1_old: .dsb 1
 apu_square_2_old: .dsb 1

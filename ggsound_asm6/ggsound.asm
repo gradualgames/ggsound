@@ -257,44 +257,45 @@ do_not_update_music:
 
 ;Note table borrowed from periods.s provided by FamiTracker's NSF driver.
 ntsc_note_table_lo:
-    .dl $07F1, $077F, $0713, $06AD, $064D, $05F3, $059D, $054C, $0500, $04B8, $0474, $0434
-    .dl $03F8, $03BF, $0389, $0356, $0326, $02F9, $02CE, $02A6, $0280, $025C, $023A, $021A
-    .dl $01FB, $01DF, $01C4, $01AB, $0193, $017C, $0167, $0152, $013F, $012D, $011C, $010C
-    .dl $00FD, $00EF, $00E1, $00D5, $00C9, $00BD, $00B3, $00A9, $009F, $0096, $008E, $0086
-    .dl $007E, $0077, $0070, $006A, $0064, $005E, $0059, $0054, $004F, $004B, $0046, $0042
-    .dl $003F, $003B, $0038, $0034, $0031, $002F, $002C, $0029, $0027, $0025, $0023, $0021
-    .dl $001F, $001D, $001B, $001A, $0018, $0017, $0015, $0014, $0013, $0012, $0011, $0010
-    .dl $000F, $000E, $000D
+    .dl $0D5B, $0C9C, $0BE6, $0B3B, $0A9A, $0A01, $0972, $08EA, $086A, $07F1, $077F, $0713
+    .dl $06AD, $064D, $05F3, $059D, $054C, $0500, $04B8, $0474, $0434, $03F8, $03BF, $0389
+    .dl $0356, $0326, $02F9, $02CE, $02A6, $0280, $025C, $023A, $021A, $01FB, $01DF, $01C4
+    .dl $01AB, $0193, $017C, $0167, $0152, $013F, $012D, $011C, $010C, $00FD, $00EF, $00E1
+    .dl $00D5, $00C9, $00BD, $00B3, $00A9, $009F, $0096, $008E, $0086, $007E, $0077, $0070
+    .dl $006A, $0064, $005E, $0059, $0054, $004F, $004B, $0046, $0042, $003F, $003B, $0038
+    .dl $0034, $0031, $002F, $002C, $0029, $0027, $0025, $0023, $0021, $001F, $001D, $001B
+    .dl $001A, $0018, $0017, $0015, $0014, $0013, $0012, $0011, $0010, $000F, $000E, $000D
+
 
 ntsc_note_table_hi:
-    .dh $07F1, $077F, $0713, $06AD, $064D, $05F3, $059D, $054C, $0500, $04B8, $0474, $0434
-    .dh $03F8, $03BF, $0389, $0356, $0326, $02F9, $02CE, $02A6, $0280, $025C, $023A, $021A
-    .dh $01FB, $01DF, $01C4, $01AB, $0193, $017C, $0167, $0152, $013F, $012D, $011C, $010C
-    .dh $00FD, $00EF, $00E1, $00D5, $00C9, $00BD, $00B3, $00A9, $009F, $0096, $008E, $0086
-    .dh $007E, $0077, $0070, $006A, $0064, $005E, $0059, $0054, $004F, $004B, $0046, $0042
-    .dh $003F, $003B, $0038, $0034, $0031, $002F, $002C, $0029, $0027, $0025, $0023, $0021
-    .dh $001F, $001D, $001B, $001A, $0018, $0017, $0015, $0014, $0013, $0012, $0011, $0010
-    .dh $000F, $000E, $000D
+    .dh $0D5B, $0C9C, $0BE6, $0B3B, $0A9A, $0A01, $0972, $08EA, $086A, $07F1, $077F, $0713
+    .dh $06AD, $064D, $05F3, $059D, $054C, $0500, $04B8, $0474, $0434, $03F8, $03BF, $0389
+    .dh $0356, $0326, $02F9, $02CE, $02A6, $0280, $025C, $023A, $021A, $01FB, $01DF, $01C4
+    .dh $01AB, $0193, $017C, $0167, $0152, $013F, $012D, $011C, $010C, $00FD, $00EF, $00E1
+    .dh $00D5, $00C9, $00BD, $00B3, $00A9, $009F, $0096, $008E, $0086, $007E, $0077, $0070
+    .dh $006A, $0064, $005E, $0059, $0054, $004F, $004B, $0046, $0042, $003F, $003B, $0038
+    .dh $0034, $0031, $002F, $002C, $0029, $0027, $0025, $0023, $0021, $001F, $001D, $001B
+    .dh $001A, $0018, $0017, $0015, $0014, $0013, $0012, $0011, $0010, $000F, $000E, $000D
 
 pal_note_table_lo:
-    .dl $0760, $06F6, $0692, $0634, $05DB, $0586, $0537, $04EC, $04A5, $0462, $0423, $03E8
-    .dl $03B0, $037B, $0349, $0319, $02ED, $02C3, $029B, $0275, $0252, $0231, $0211, $01F3
-    .dl $01D7, $01BD, $01A4, $018C, $0176, $0161, $014D, $013A, $0129, $0118, $0108, $00F9
-    .dl $00EB, $00DE, $00D1, $00C6, $00BA, $00B0, $00A6, $009D, $0094, $008B, $0084, $007C
-    .dl $0075, $006E, $0068, $0062, $005D, $0057, $0052, $004E, $0049, $0045, $0041, $003E
-    .dl $003A, $0037, $0034, $0031, $002E, $002B, $0029, $0026, $0024, $0022, $0020, $001E
-    .dl $001D, $001B, $0019, $0018, $0016, $0015, $0014, $0013, $0012, $0011, $0010, $000F
-    .dl $000E, $000D, $000C
+    .dl $0C68, $0BB6, $0B0E, $0A6F, $09D9, $094B, $08C6, $0848, $07D1, $0760, $06F6, $0692
+    .dl $0634, $05DB, $0586, $0537, $04EC, $04A5, $0462, $0423, $03E8, $03B0, $037B, $0349
+    .dl $0319, $02ED, $02C3, $029B, $0275, $0252, $0231, $0211, $01F3, $01D7, $01BD, $01A4
+    .dl $018C, $0176, $0161, $014D, $013A, $0129, $0118, $0108, $00F9, $00EB, $00DE, $00D1
+    .dl $00C6, $00BA, $00B0, $00A6, $009D, $0094, $008B, $0084, $007C, $0075, $006E, $0068
+    .dl $0062, $005D, $0057, $0052, $004E, $0049, $0045, $0041, $003E, $003A, $0037, $0034
+    .dl $0031, $002E, $002B, $0029, $0026, $0024, $0022, $0020, $001E, $001D, $001B, $0019
+    .dl $0018, $0016, $0015, $0014, $0013, $0012, $0011, $0010, $000F, $000E, $000D, $000C
 
 pal_note_table_hi:
-    .dh $0760, $06F6, $0692, $0634, $05DB, $0586, $0537, $04EC, $04A5, $0462, $0423, $03E8
-    .dh $03B0, $037B, $0349, $0319, $02ED, $02C3, $029B, $0275, $0252, $0231, $0211, $01F3
-    .dh $01D7, $01BD, $01A4, $018C, $0176, $0161, $014D, $013A, $0129, $0118, $0108, $00F9
-    .dh $00EB, $00DE, $00D1, $00C6, $00BA, $00B0, $00A6, $009D, $0094, $008B, $0084, $007C
-    .dh $0075, $006E, $0068, $0062, $005D, $0057, $0052, $004E, $0049, $0045, $0041, $003E
-    .dh $003A, $0037, $0034, $0031, $002E, $002B, $0029, $0026, $0024, $0022, $0020, $001E
-    .dh $001D, $001B, $0019, $0018, $0016, $0015, $0014, $0013, $0012, $0011, $0010, $000F
-    .dh $000E, $000D, $000C
+    .dh $0C68, $0BB6, $0B0E, $0A6F, $09D9, $094B, $08C6, $0848, $07D1, $0760, $06F6, $0692
+    .dh $0634, $05DB, $0586, $0537, $04EC, $04A5, $0462, $0423, $03E8, $03B0, $037B, $0349
+    .dh $0319, $02ED, $02C3, $029B, $0275, $0252, $0231, $0211, $01F3, $01D7, $01BD, $01A4
+    .dh $018C, $0176, $0161, $014D, $013A, $0129, $0118, $0108, $00F9, $00EB, $00DE, $00D1
+    .dh $00C6, $00BA, $00B0, $00A6, $009D, $0094, $008B, $0084, $007C, $0075, $006E, $0068
+    .dh $0062, $005D, $0057, $0052, $004E, $0049, $0045, $0041, $003E, $003A, $0037, $0034
+    .dh $0031, $002E, $002B, $0029, $0026, $0024, $0022, $0020, $001E, $001D, $001B, $0019
+    .dh $0018, $0016, $0015, $0014, $0013, $0012, $0011, $0010, $000F, $000E, $000D, $000C
 
 ;Maps NTSC to NTSC tempo, maps PAL and Dendy to
 ;faster PAL tempo in song and sfx headers.
@@ -379,6 +380,17 @@ stream_callback_table_hi:
     .dh (stream_set_arpeggio_envelope)
     endif
 
+ifdef FEATURE_ARPEGGIOS
+arpeggio_callback_table_lo:
+    .dl arpeggio_absolute-1
+    .dl arpeggio_fixed-1
+    .dl arpeggio_relative-1
+
+arpeggio_callback_table_hi:
+    .dh arpeggio_absolute-1
+    .dh arpeggio_fixed-1
+    .dh arpeggio_relative-1
+endif
 
 ;****************************************************************
 ;These callbacks are all note playback and only execute once per
@@ -403,60 +415,26 @@ square_1_play_note:
     lda (base_address_arpeggio_envelopes),y
     sta sound_local_word_0+1
 
-    ldy stream_arpeggio_offset,x
-
+    ;Get arpeggio type.
+    ldy #0
     lda (sound_local_word_0),y
-    cmp #ENV_STOP
-    beq @arpeggio_stop
-    cmp #ENV_LOOP
-    beq @arpeggio_loop
-@arpeggio_play:
-
-    ;We're changing notes.
-    lda stream_flags,x
-    and #STREAM_PITCH_LOADED_CLEAR
-    sta stream_flags,x
-
-    ;Load the current arpeggio value and add it to current note.
-    clc
-    lda (sound_local_word_0),y
-    adc stream_byte
-    tay
-    ;Advance arpeggio offset.
-    inc stream_arpeggio_offset,x
-
-    jmp @arpeggio_done
-@arpeggio_stop:
-
-    ;Just load the current note.
-    ldy stream_byte
-
-    jmp @arpeggio_done
-@arpeggio_loop:
-
-    ;We hit a loop opcode, advance envelope index and load loop point.
-    iny
-    lda (sound_local_word_0),y
-    sta stream_arpeggio_offset,x
     tay
 
-    ;We're changing notes.
-    lda stream_flags,x
-    and #STREAM_PITCH_LOADED_CLEAR
-    sta stream_flags,x
-
-    ;Load the current arpeggio value and add it to current note.
-    clc
-    lda (sound_local_word_0),y
-    adc stream_byte
-    tay
-    ;Advance arpeggio offset.
-    inc stream_arpeggio_offset,x
-@arpeggio_done:
+    ;Get the address.
+    lda #>(@return_from_arpeggio_callback-1)
+    pha
+    lda #<(@return_from_arpeggio_callback-1)
+    pha
+    lda arpeggio_callback_table_hi,y
+    pha
+    lda arpeggio_callback_table_lo,y
+    pha
+    rts
+    @return_from_arpeggio_callback:
 
     else
 
-    ldy stream_byte
+    ldy stream_note,x
 
     endif
 
@@ -639,7 +617,7 @@ square_2_play_note = square_1_play_note
 triangle_play_note:
 
     ;Load note index
-    ldy stream_byte
+    ldy stream_note,x
 
     ifdef FEATURE_ARPEGGIOS
     ;Load arpeggio index.
@@ -653,60 +631,26 @@ triangle_play_note:
     lda (base_address_arpeggio_envelopes),y
     sta sound_local_word_0+1
 
-    ldy stream_arpeggio_offset,x
-
+    ;Get arpeggio type.
+    ldy #0
     lda (sound_local_word_0),y
-    cmp #ENV_STOP
-    beq @arpeggio_stop
-    cmp #ENV_LOOP
-    beq @arpeggio_loop
-@arpeggio_play:
-
-    ;We're changing notes.
-    lda stream_flags,x
-    and #STREAM_PITCH_LOADED_CLEAR
-    sta stream_flags,x
-
-    ;Load the current arpeggio value and add it to current note.
-    clc
-    lda (sound_local_word_0),y
-    adc stream_byte
-    tay
-    ;Advance arpeggio offset.
-    inc stream_arpeggio_offset,x
-
-    jmp @arpeggio_done
-@arpeggio_stop:
-
-    ;Just load the current note.
-    ldy stream_byte
-
-    jmp @arpeggio_done
-@arpeggio_loop:
-
-    ;We hit a loop opcode, advance envelope index and load loop point.
-    iny
-    lda (sound_local_word_0),y
-    sta stream_arpeggio_offset,x
     tay
 
-    ;We're changing notes.
-    lda stream_flags,x
-    and #STREAM_PITCH_LOADED_CLEAR
-    sta stream_flags,x
-
-    ;Load the current arpeggio value and add it to current note.
-    clc
-    lda (sound_local_word_0),y
-    adc stream_byte
-    tay
-    ;Advance arpeggio offset.
-    inc stream_arpeggio_offset,x
-@arpeggio_done:
+    ;Get the address.
+    lda #>(@return_from_arpeggio_callback-1)
+    pha
+    lda #<(@return_from_arpeggio_callback-1)
+    pha
+    lda arpeggio_callback_table_hi,y
+    pha
+    lda arpeggio_callback_table_lo,y
+    pha
+    rts
+    @return_from_arpeggio_callback:
 
     else
 
-    ldy stream_byte
+    ldy stream_note,x
 
     endif
 
@@ -830,7 +774,7 @@ noise_play_note:
     ifdef FEATURE_ARPEGGIOS
     ;Load arpeggio index.
     lda stream_arpeggio_index,x
-    asl
+    asl a
     tay
     ;Load arpeggio address.
     lda (base_address_arpeggio_envelopes),y
@@ -839,78 +783,32 @@ noise_play_note:
     lda (base_address_arpeggio_envelopes),y
     sta sound_local_word_0+1
 
-    ldy stream_arpeggio_offset,x
-
+    ;Get arpeggio type.
+    ldy #0
     lda (sound_local_word_0),y
-    cmp #ENV_STOP
-    beq @arpeggio_stop
-    cmp #ENV_LOOP
-    beq @arpeggio_loop
-@arpeggio_play:
-
-    ;We're changing notes.
-    lda stream_flags,x
-    and #STREAM_PITCH_LOADED_CLEAR
-    sta stream_flags,x
-
-    ;Load the current arpeggio value and use it as the current note.
-    clc
-    lda (sound_local_word_0),y
-    and #%01111111
-    sta sound_local_byte_0
-    ;Advance arpeggio offset.
-    inc stream_arpeggio_offset,x
-
-    jmp @done
-@arpeggio_stop:
-
-    ;On noise, when an arpeggio is done, we're changing notes to the
-    ;currently playing note. (This is FamiTracker's behavior)
-    ;However, we only do this if we're stopping at any point other
-    ;than zero, which indicates an arpeggio did in fact execute.
-    lda stream_arpeggio_offset,x
-    beq @skip_clear_pitch_loaded
-    lda stream_flags,x
-    and #STREAM_PITCH_LOADED_CLEAR
-    sta stream_flags,x
-@skip_clear_pitch_loaded:
-
-    ;Load note index. (really more of a "sound type" for noise)
-    lda stream_byte
-    and #%01111111
-    sta sound_local_byte_0
-
-    jmp @done
-@arpeggio_loop:
-
-    ;We hit a loop opcode, advance envelope index and load loop point.
-    iny
-    lda (sound_local_word_0),y
-    sta stream_arpeggio_offset,x
     tay
 
-    ;We're changing notes.
-    lda stream_flags,x
-    and #STREAM_PITCH_LOADED_CLEAR
-    sta stream_flags,x
-
-    ;Load the current arpeggio value and use it as the current note.
-    clc
-    lda (sound_local_word_0),y
-    and #%01111111
-    sta sound_local_byte_0
-    ;Advance arpeggio offset.
-    inc stream_arpeggio_offset,x
-@done:
+    ;Get the address.
+    lda #>(@return_from_arpeggio_callback-1)
+    pha
+    lda #<(@return_from_arpeggio_callback-1)
+    pha
+    lda arpeggio_callback_table_hi,y
+    pha
+    lda arpeggio_callback_table_lo,y
+    pha
+    rts
+    @return_from_arpeggio_callback:
 
     else
 
-    ;Load note index. (really more of a "sound type" for noise)
-    lda stream_byte
-    and #%01111111
-    sta sound_local_byte_0
+    ldy stream_note,x
 
     endif
+
+    tya
+    and #%01111111
+    sta sound_local_byte_0
 
     ;Skip loading note pitch if already loaded, to allow envelopes
     ;to modify the pitch.
@@ -1065,7 +963,7 @@ dpcm_play_note:
     bne @note_already_played
 
     ;Load note index.
-    ldy stream_byte
+    ldy stream_note,x
 
     ;Get sample index.
     lda (base_address_dpcm_note_to_sample_index),y
@@ -1077,7 +975,7 @@ dpcm_play_note:
     sta stream_channel_register_3,x
 
     ;Get loop and pitch from dpcm_note_to_loop_pitch_index table.
-    ldy stream_byte
+    ldy stream_note,x
     lda (base_address_dpcm_note_to_loop_pitch_index),y
     sta stream_channel_register_1,x
 
@@ -1102,6 +1000,189 @@ dpcm_play_note:
 @note_already_played:
 
     rts
+endif
+
+ifdef FEATURE_ARPEGGIOS
+
+arpeggio_absolute:
+
+    ldy stream_arpeggio_offset,x
+
+    lda (sound_local_word_0),y
+    cmp #ENV_STOP
+    beq @arpeggio_stop
+    cmp #ENV_LOOP
+    beq @arpeggio_loop
+@arpeggio_play:
+
+    ;We're changing notes.
+    lda stream_flags,x
+    and #STREAM_PITCH_LOADED_CLEAR
+    sta stream_flags,x
+
+    ;Load the current arpeggio value and add it to current note.
+    clc
+    lda (sound_local_word_0),y
+    adc stream_note,x
+    tay
+    ;Advance arpeggio offset.
+    inc stream_arpeggio_offset,x
+
+    jmp @done
+@arpeggio_stop:
+
+    ;Just load the current note.
+    ldy stream_note,x
+
+    jmp @done
+@arpeggio_loop:
+
+    ;We hit a loop opcode, advance envelope index and load loop point.
+    iny
+    lda (sound_local_word_0),y
+    sta stream_arpeggio_offset,x
+    tay
+
+    ;We're changing notes.
+    lda stream_flags,x
+    and #STREAM_PITCH_LOADED_CLEAR
+    sta stream_flags,x
+
+    ;Load the current arpeggio value and add it to current note.
+    clc
+    lda (sound_local_word_0),y
+    adc stream_note,x
+    tay
+    ;Advance arpeggio offset.
+    inc stream_arpeggio_offset,x
+@done:
+
+    rts
+
+arpeggio_fixed:
+
+    ldy stream_arpeggio_offset,x
+
+    lda (sound_local_word_0),y
+    cmp #ENV_STOP
+    beq @arpeggio_stop
+    cmp #ENV_LOOP
+    beq @arpeggio_loop
+@arpeggio_play:
+
+    ;We're changing notes.
+    lda stream_flags,x
+    and #STREAM_PITCH_LOADED_CLEAR
+    sta stream_flags,x
+
+    ;Load the current arpeggio value and use it as the current note.
+    lda (sound_local_word_0),y
+    ;sta stream_note,x
+    tay
+    ;Advance arpeggio offset.
+    inc stream_arpeggio_offset,x
+
+    jmp @done
+@arpeggio_stop:
+
+    ;When a fixed arpeggio is done, we're changing notes to the
+    ;currently playing note. (This is FamiTracker's behavior)
+    ;However, we only do this if we're stopping at any point other
+    ;than one, which indicates an arpeggio did in fact execute.
+    lda stream_arpeggio_offset,x
+    cmp #1
+    beq @skip_clear_pitch_loaded
+    lda stream_flags,x
+    and #STREAM_PITCH_LOADED_CLEAR
+    sta stream_flags,x
+@skip_clear_pitch_loaded:
+
+    ;Just load the current note.
+    ldy stream_note,x
+
+    jmp @done
+@arpeggio_loop:
+
+    ;We hit a loop opcode, advance envelope index and load loop point.
+    iny
+    lda (sound_local_word_0),y
+    sta stream_arpeggio_offset,x
+    tay
+
+    ;We're changing notes.
+    lda stream_flags,x
+    and #STREAM_PITCH_LOADED_CLEAR
+    sta stream_flags,x
+
+    ;Load the current arpeggio value and use it as the current note.
+    lda (sound_local_word_0),y
+    tay
+    ;Advance arpeggio offset.
+    inc stream_arpeggio_offset,x
+@done:
+
+    rts
+
+arpeggio_relative:
+
+    ldy stream_arpeggio_offset,x
+
+    lda (sound_local_word_0),y
+    cmp #ENV_STOP
+    beq @arpeggio_stop
+    cmp #ENV_LOOP
+    beq @arpeggio_loop
+@arpeggio_play:
+
+    ;We're changing notes.
+    lda stream_flags,x
+    and #STREAM_PITCH_LOADED_CLEAR
+    sta stream_flags,x
+
+    ;Load the current arpeggio value and add it to current note.
+    clc
+    lda (sound_local_word_0),y
+    adc stream_note,x
+    cmp #HIGHEST_NOTE
+    bmi @skip
+    lda #HIGHEST_NOTE
+    @skip
+    sta stream_note,x
+    tay
+    ;Advance arpeggio offset.
+    inc stream_arpeggio_offset,x
+
+    jmp @done
+@arpeggio_stop:
+
+    ;Just load the current note.
+    ldy stream_note,x
+
+    jmp @done
+@arpeggio_loop:
+
+    ;We hit a loop opcode, advance envelope index and load loop point.
+    iny
+    lda (sound_local_word_0),y
+    sta stream_arpeggio_offset,x
+    tay
+
+    ;We're changing notes.
+    lda stream_flags,x
+    and #STREAM_PITCH_LOADED_CLEAR
+    sta stream_flags,x
+
+    ;Load the current arpeggio value and add it to current note.
+    clc
+    lda (sound_local_word_0),y
+    adc stream_note,x
+    tay
+    ;Advance arpeggio offset.
+    inc stream_arpeggio_offset,x
+@done:
+
+    rts
+
 endif
 
 ;****************************************************************
@@ -1138,7 +1219,7 @@ stream_set_arpeggio_envelope:
     ldy #0
     lda (sound_local_word_0),y
     sta stream_arpeggio_index,x
-    lda #0
+    lda #1
     sta stream_arpeggio_offset,x
 
     rts
@@ -1184,7 +1265,7 @@ stream_set_length_s:
 
     ;determine note length from opcode
     sec
-    lda stream_byte
+    lda stream_note,x
     sbc #OPCODES_BASE
     clc
     adc #1
@@ -1862,6 +1943,8 @@ starting_read_address = sound_param_word_0
     sta stream_duty_offset,x
     ifdef FEATURE_ARPEGGIOS
     sta stream_arpeggio_index,x
+    ;Set arpeggio offset to 1 because index 0 contains arpeggio type.
+    lda #1
     sta stream_arpeggio_offset,x
     endif
 
@@ -1929,9 +2012,13 @@ read_address = sound_local_word_1
     sta read_address+1
 
     ;Load next byte from stream data.
+    lda stream_flags,x
+    and #STREAM_PITCH_LOADED_TEST
+    bne @skip
     ldy #0
     lda (read_address),y
-    sta stream_byte
+    sta stream_note,x
+    @skip
 
     ;Is this byte a note or a stream opcode?
     cmp #OPCODES_BASE
@@ -1995,7 +2082,8 @@ read_address = sound_local_word_1
     sta stream_pitch_offset,x
     sta stream_duty_offset,x
     ifdef FEATURE_ARPEGGIOS
-    ;Reset arpeggio offset.
+    ;Set arpeggio offset to 1 because index 0 contains arpeggio type.
+    lda #1
     sta stream_arpeggio_offset,x
     endif
 
