@@ -537,23 +537,20 @@ square_1_play_note:
 @skip_pitch_loop:
 
     ;Test sign.
+    clc
     lda (sound_local_word_0),y
     bmi @pitch_delta_negative
 @pitch_delta_positive:
-
-    clc
     lda stream_channel_register_3,x
     adc (sound_local_word_0),y
     sta stream_channel_register_3,x
-    lda stream_channel_register_4,x
-    adc #0
-    sta stream_channel_register_4,x
+    bcc @pitch_delta_skip_inc
+    inc stream_channel_register_4,x
+@pitch_delta_skip_inc:
 
     jmp @pitch_delta_test_done
 
 @pitch_delta_negative:
-
-    clc
     lda stream_channel_register_3,x
     adc (sound_local_word_0),y
     sta stream_channel_register_3,x
@@ -734,23 +731,20 @@ triangle_play_note:
 @skip_pitch_loop:
 
     ;Test sign.
+    clc
     lda (sound_local_word_0),y
     bmi @pitch_delta_negative
 @pitch_delta_positive:
-
-    clc
     lda stream_channel_register_3,x
     adc (sound_local_word_0),y
     sta stream_channel_register_3,x
-    lda stream_channel_register_4,x
-    adc #0
-    sta stream_channel_register_4,x
+    bcc @pitch_delta_skip_inc
+    inc stream_channel_register_4,x
+@pitch_delta_skip_inc:
 
     jmp @pitch_delta_test_done
 
 @pitch_delta_negative:
-
-    clc
     lda stream_channel_register_3,x
     adc (sound_local_word_0),y
     sta stream_channel_register_3,x
@@ -1026,13 +1020,13 @@ arpeggio_absolute:
     ;Advance arpeggio offset.
     inc stream_arpeggio_offset,x
 
-    jmp @done
+    rts
 @arpeggio_stop:
 
     ;Just load the current note.
     ldy stream_note,x
 
-    jmp @done
+    rts
 @arpeggio_loop:
 
     ;We hit a loop opcode, advance envelope index and load loop point.
@@ -1080,7 +1074,7 @@ arpeggio_fixed:
     ;Advance arpeggio offset.
     inc stream_arpeggio_offset,x
 
-    jmp @done
+    rts
 @arpeggio_stop:
 
     ;When a fixed arpeggio is done, we're changing notes to the
@@ -1098,7 +1092,7 @@ arpeggio_fixed:
     ;Just load the current note.
     ldy stream_note,x
 
-    jmp @done
+    rts
 @arpeggio_loop:
 
     ;We hit a loop opcode, advance envelope index and load loop point.
@@ -1150,13 +1144,13 @@ arpeggio_relative:
     ;Advance arpeggio offset.
     inc stream_arpeggio_offset,x
 
-    jmp @done
+    rts
 @arpeggio_stop:
 
     ;Just load the current note.
     ldy stream_note,x
 
-    jmp @done
+    rts
 @arpeggio_loop:
 
     ;We hit a loop opcode, advance envelope index and load loop point.
@@ -1527,8 +1521,6 @@ play_song:
 
     lda #2
     sta sound_param_byte_0
-
-    lda #2
     sta sound_param_byte_1
 
     jsr stream_initialize
@@ -1561,8 +1553,6 @@ play_song:
 
     lda #3
     sta sound_param_byte_0
-
-    lda #3
     sta sound_param_byte_1
 
     jsr stream_initialize
@@ -1596,8 +1586,6 @@ play_song:
 
     lda #4
     sta sound_param_byte_0
-
-    lda #4
     sta sound_param_byte_1
 
     jsr stream_initialize
@@ -1918,9 +1906,8 @@ starting_read_address = sound_param_word_0
     ora starting_read_address+1
     beq @null_starting_read_address
 
-    ;Set stream to be inactive while initializing.
-    lda #0
-    sta stream_flags,x
+   
+    
 
     ;Set a default note length (20 frames).
     lda #20
@@ -1930,9 +1917,10 @@ starting_read_address = sound_param_word_0
     lda #0
     sta stream_note_length_hi,x
     sta stream_note_length_counter_hi,x
+    ;Set stream to be inactive while initializing.
+    sta stream_flags,x
 
     ;Set initial envelope indices.
-    lda #0
     sta stream_volume_index,x
     sta stream_pitch_index,x
     sta stream_duty_index,x
@@ -2020,12 +2008,11 @@ read_address = sound_local_word_1
 
     ;Is this byte a note or a stream opcode?
     cmp #OPCODES_BASE
-    bpl @process_opcode
+    bcs @process_opcode
 @process_note:
 
     ;Determine which channel callback to use.
-    lda stream_channel,x
-    tay
+    ldy stream_channel,x
     lda channel_callback_table_lo,y
     sta callback_address
     lda channel_callback_table_hi,y
@@ -2046,7 +2033,7 @@ read_address = sound_local_word_1
     ;Reset tempo counter when we cross 0 by adding original tempo back on.
     ;This way we have a wrap-around value that does not get lost when we count
     ;down to the next note.
-    clc
+    ;clc;Guaranteed Clear
     lda stream_tempo_counter_lo,x
     adc stream_tempo_lo,x
     sta stream_tempo_counter_lo,x
@@ -2067,6 +2054,12 @@ read_address = sound_local_word_1
     ora stream_note_length_counter_hi,x
 
     bne @note_length_counter_not_zero
+    
+     ;Reset volume, pitch, and duty offsets.
+    ;lda #0;Guaranteed due to the branch above
+    sta stream_volume_offset,x
+    sta stream_pitch_offset,x
+    sta stream_duty_offset,x
 
     ;Reset the note length counter.
     lda stream_note_length_lo,x
@@ -2074,11 +2067,7 @@ read_address = sound_local_word_1
     lda stream_note_length_hi,x
     sta stream_note_length_counter_hi,x
 
-    ;Reset volume, pitch, and duty offsets.
-    lda #0
-    sta stream_volume_offset,x
-    sta stream_pitch_offset,x
-    sta stream_duty_offset,x
+   
     ifdef FEATURE_ARPEGGIOS
     ;Set arpeggio offset to 1 because index 0 contains arpeggio type.
     lda #1
@@ -2100,7 +2089,7 @@ read_address = sound_local_word_1
 @process_opcode:
 
     ;Look up the opcode in the stream callbacks table.
-    sec
+    ;sec;We branched on set carry to get here
     sbc #OPCODES_BASE
     tay
     ;Get the address.
