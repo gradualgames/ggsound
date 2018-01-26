@@ -52,8 +52,6 @@ currently supports:
 
 - Square 1, 2, Triangle, Noise, and DPCM channels
 - Volume, Arpeggio, Pitch and Duty envelopes
-- Arpeggios are absolute on all channels but noise, where they
-are fixed.
 - Hi-Pitch envelopes are NOT supported
 - Looping envelopes at an arbitrary loop point
 - Speed and Tempo
@@ -64,7 +62,7 @@ unique patterns) command
 - Multi-song export
 - Sound effects on two channels
 - Pause/unpause
-- All 87 audible notes in FamiTracker
+- Full 96 note range of FamiTracker
 - 128 of each type of envelope
 - 128 songs
 - 128 sound effects
@@ -98,6 +96,11 @@ to help exercise GGSound and the converter.
 exercise GGSound.
 
 # Changes:
+* 1-25-18: Refactored arpeggio execution to support all three
+           arpeggio types: absolute, fixed and relative. Re-tested
+           with FamiCuber's track. This is a new feature, please
+           send me bug reports if you run into any problems.
+           Added FamiTracker's full 96 note range table.
 * 1-20-18: Fixed regression from noise arpeggio execution which
            would prevent noise pitch envelopes from executing.
            This bug included fixes in ft_txt_to_asm.py and in
@@ -272,14 +275,12 @@ currently supported:
 the end of a frame. MAKE SURE TO INCLUDE THIS EFFECT AT THE END
 OF EACH OF YOUR SONG'S CHANNELS OR THE DATA WILL NOT BE CORRECT.
 THESE MUST BE IN *UNIQUE* PATTERNS.
--note cuts
+- note cuts
 - volume envlopes
 - arpeggio envelopes. These can be disabled if you do not wish
 to use them by setting ARPEGGIOS_ENABLED = False within
 ft_txt_to_asm.py, at the top of the file. Just open it in a text
 editor.
-- Arpeggios are absolute on all channels but noise, where they
-are fixed.
 - pitch envelopes
 - hi-pitch envelopes are NOT supported
 - duty envelopes
