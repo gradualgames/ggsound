@@ -1,4 +1,5 @@
 stream_flags:                  .rs MAX_STREAMS
+stream_note:                   .rs MAX_STREAMS
 stream_note_length_lo:         .rs MAX_STREAMS
 stream_note_length_hi:         .rs MAX_STREAMS
 stream_note_length_counter_lo: .rs MAX_STREAMS

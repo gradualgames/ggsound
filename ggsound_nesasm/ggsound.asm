@@ -1,3 +1,4 @@
+  LIST
 ;Expects sound_param_byte_0 to contain desired region (SOUND_REGION_NTSC, SOUND_REGION_PAL, SOUND_REGION_DENDY)
 ;Expects sound_param_word_0 to contain song list address.
 ;Expects sound_param_word_1 to contain sfx list address.
@@ -258,44 +259,44 @@ do_not_update_music:
 
 ;Note table borrowed from periods.s provided by FamiTracker's NSF driver.
 ntsc_note_table_lo:
-    .db low($07F1), low($077F), low($0713), low($06AD), low($064D), low($05F3), low($059D), low($054C), low($0500), low($04B8), low($0474), low($0434)
-    .db low($03F8), low($03BF), low($0389), low($0356), low($0326), low($02F9), low($02CE), low($02A6), low($0280), low($025C), low($023A), low($021A)
-    .db low($01FB), low($01DF), low($01C4), low($01AB), low($0193), low($017C), low($0167), low($0152), low($013F), low($012D), low($011C), low($010C)
-    .db low($00FD), low($00EF), low($00E1), low($00D5), low($00C9), low($00BD), low($00B3), low($00A9), low($009F), low($0096), low($008E), low($0086)
-    .db low($007E), low($0077), low($0070), low($006A), low($0064), low($005E), low($0059), low($0054), low($004F), low($004B), low($0046), low($0042)
-    .db low($003F), low($003B), low($0038), low($0034), low($0031), low($002F), low($002C), low($0029), low($0027), low($0025), low($0023), low($0021)
-    .db low($001F), low($001D), low($001B), low($001A), low($0018), low($0017), low($0015), low($0014), low($0013), low($0012), low($0011), low($0010)
-    .db low($000F), low($000E), low($000D)
+    .db low($0D5B), low($0C9C), low($0BE6), low($0B3B), low($0A9A), low($0A01), low($0972), low($08EA), low($086A), low($07F1), low($077F), low($0713)
+    .db low($06AD), low($064D), low($05F3), low($059D), low($054C), low($0500), low($04B8), low($0474), low($0434), low($03F8), low($03BF), low($0389)
+    .db low($0356), low($0326), low($02F9), low($02CE), low($02A6), low($0280), low($025C), low($023A), low($021A), low($01FB), low($01DF), low($01C4)
+    .db low($01AB), low($0193), low($017C), low($0167), low($0152), low($013F), low($012D), low($011C), low($010C), low($00FD), low($00EF), low($00E1)
+    .db low($00D5), low($00C9), low($00BD), low($00B3), low($00A9), low($009F), low($0096), low($008E), low($0086), low($007E), low($0077), low($0070)
+    .db low($006A), low($0064), low($005E), low($0059), low($0054), low($004F), low($004B), low($0046), low($0042), low($003F), low($003B), low($0038)
+    .db low($0034), low($0031), low($002F), low($002C), low($0029), low($0027), low($0025), low($0023), low($0021), low($001F), low($001D), low($001B)
+    .db low($001A), low($0018), low($0017), low($0015), low($0014), low($0013), low($0012), low($0011), low($0010), low($000F), low($000E), low($000D)
 
 ntsc_note_table_hi:
-    .db high($07F1), high($077F), high($0713), high($06AD), high($064D), high($05F3), high($059D), high($054C), high($0500), high($04B8), high($0474), high($0434)
-    .db high($03F8), high($03BF), high($0389), high($0356), high($0326), high($02F9), high($02CE), high($02A6), high($0280), high($025C), high($023A), high($021A)
-    .db high($01FB), high($01DF), high($01C4), high($01AB), high($0193), high($017C), high($0167), high($0152), high($013F), high($012D), high($011C), high($010C)
-    .db high($00FD), high($00EF), high($00E1), high($00D5), high($00C9), high($00BD), high($00B3), high($00A9), high($009F), high($0096), high($008E), high($0086)
-    .db high($007E), high($0077), high($0070), high($006A), high($0064), high($005E), high($0059), high($0054), high($004F), high($004B), high($0046), high($0042)
-    .db high($003F), high($003B), high($0038), high($0034), high($0031), high($002F), high($002C), high($0029), high($0027), high($0025), high($0023), high($0021)
-    .db high($001F), high($001D), high($001B), high($001A), high($0018), high($0017), high($0015), high($0014), high($0013), high($0012), high($0011), high($0010)
-    .db high($000F), high($000E), high($000D)
+    .db high($0D5B), high($0C9C), high($0BE6), high($0B3B), high($0A9A), high($0A01), high($0972), high($08EA), high($086A), high($07F1), high($077F), high($0713)
+    .db high($06AD), high($064D), high($05F3), high($059D), high($054C), high($0500), high($04B8), high($0474), high($0434), high($03F8), high($03BF), high($0389)
+    .db high($0356), high($0326), high($02F9), high($02CE), high($02A6), high($0280), high($025C), high($023A), high($021A), high($01FB), high($01DF), high($01C4)
+    .db high($01AB), high($0193), high($017C), high($0167), high($0152), high($013F), high($012D), high($011C), high($010C), high($00FD), high($00EF), high($00E1)
+    .db high($00D5), high($00C9), high($00BD), high($00B3), high($00A9), high($009F), high($0096), high($008E), high($0086), high($007E), high($0077), high($0070)
+    .db high($006A), high($0064), high($005E), high($0059), high($0054), high($004F), high($004B), high($0046), high($0042), high($003F), high($003B), high($0038)
+    .db high($0034), high($0031), high($002F), high($002C), high($0029), high($0027), high($0025), high($0023), high($0021), high($001F), high($001D), high($001B)
+    .db high($001A), high($0018), high($0017), high($0015), high($0014), high($0013), high($0012), high($0011), high($0010), high($000F), high($000E), high($000D)
 
 pal_note_table_lo:
-    .db low($0760), low($06F6), low($0692), low($0634), low($05DB), low($0586), low($0537), low($04EC), low($04A5), low($0462), low($0423), low($03E8)
-    .db low($03B0), low($037B), low($0349), low($0319), low($02ED), low($02C3), low($029B), low($0275), low($0252), low($0231), low($0211), low($01F3)
-    .db low($01D7), low($01BD), low($01A4), low($018C), low($0176), low($0161), low($014D), low($013A), low($0129), low($0118), low($0108), low($00F9)
-    .db low($00EB), low($00DE), low($00D1), low($00C6), low($00BA), low($00B0), low($00A6), low($009D), low($0094), low($008B), low($0084), low($007C)
-    .db low($0075), low($006E), low($0068), low($0062), low($005D), low($0057), low($0052), low($004E), low($0049), low($0045), low($0041), low($003E)
-    .db low($003A), low($0037), low($0034), low($0031), low($002E), low($002B), low($0029), low($0026), low($0024), low($0022), low($0020), low($001E)
-    .db low($001D), low($001B), low($0019), low($0018), low($0016), low($0015), low($0014), low($0013), low($0012), low($0011), low($0010), low($000F)
-    .db low($000E), low($000D), low($000C)
+    .db low($0C68), low($0BB6), low($0B0E), low($0A6F), low($09D9), low($094B), low($08C6), low($0848), low($07D1), low($0760), low($06F6), low($0692)
+    .db low($0634), low($05DB), low($0586), low($0537), low($04EC), low($04A5), low($0462), low($0423), low($03E8), low($03B0), low($037B), low($0349)
+    .db low($0319), low($02ED), low($02C3), low($029B), low($0275), low($0252), low($0231), low($0211), low($01F3), low($01D7), low($01BD), low($01A4)
+    .db low($018C), low($0176), low($0161), low($014D), low($013A), low($0129), low($0118), low($0108), low($00F9), low($00EB), low($00DE), low($00D1)
+    .db low($00C6), low($00BA), low($00B0), low($00A6), low($009D), low($0094), low($008B), low($0084), low($007C), low($0075), low($006E), low($0068)
+    .db low($0062), low($005D), low($0057), low($0052), low($004E), low($0049), low($0045), low($0041), low($003E), low($003A), low($0037), low($0034)
+    .db low($0031), low($002E), low($002B), low($0029), low($0026), low($0024), low($0022), low($0020), low($001E), low($001D), low($001B), low($0019)
+    .db low($0018), low($0016), low($0015), low($0014), low($0013), low($0012), low($0011), low($0010), low($000F), low($000E), low($000D), low($000C)
 
 pal_note_table_hi:
-    .db high($0760), high($06F6), high($0692), high($0634), high($05DB), high($0586), high($0537), high($04EC), high($04A5), high($0462), high($0423), high($03E8)
-    .db high($03B0), high($037B), high($0349), high($0319), high($02ED), high($02C3), high($029B), high($0275), high($0252), high($0231), high($0211), high($01F3)
-    .db high($01D7), high($01BD), high($01A4), high($018C), high($0176), high($0161), high($014D), high($013A), high($0129), high($0118), high($0108), high($00F9)
-    .db high($00EB), high($00DE), high($00D1), high($00C6), high($00BA), high($00B0), high($00A6), high($009D), high($0094), high($008B), high($0084), high($007C)
-    .db high($0075), high($006E), high($0068), high($0062), high($005D), high($0057), high($0052), high($004E), high($0049), high($0045), high($0041), high($003E)
-    .db high($003A), high($0037), high($0034), high($0031), high($002E), high($002B), high($0029), high($0026), high($0024), high($0022), high($0020), high($001E)
-    .db high($001D), high($001B), high($0019), high($0018), high($0016), high($0015), high($0014), high($0013), high($0012), high($0011), high($0010), high($000F)
-    .db high($000E), high($000D), high($000C)
+    .db high($0C68), high($0BB6), high($0B0E), high($0A6F), high($09D9), high($094B), high($08C6), high($0848), high($07D1), high($0760), high($06F6), high($0692)
+    .db high($0634), high($05DB), high($0586), high($0537), high($04EC), high($04A5), high($0462), high($0423), high($03E8), high($03B0), high($037B), high($0349)
+    .db high($0319), high($02ED), high($02C3), high($029B), high($0275), high($0252), high($0231), high($0211), high($01F3), high($01D7), high($01BD), high($01A4)
+    .db high($018C), high($0176), high($0161), high($014D), high($013A), high($0129), high($0118), high($0108), high($00F9), high($00EB), high($00DE), high($00D1)
+    .db high($00C6), high($00BA), high($00B0), high($00A6), high($009D), high($0094), high($008B), high($0084), high($007C), high($0075), high($006E), high($0068)
+    .db high($0062), high($005D), high($0057), high($0052), high($004E), high($0049), high($0045), high($0041), high($003E), high($003A), high($0037), high($0034)
+    .db high($0031), high($002E), high($002B), high($0029), high($0026), high($0024), high($0022), high($0020), high($001E), high($001D), high($001B), high($0019)
+    .db high($0018), high($0016), high($0015), high($0014), high($0013), high($0012), high($0011), high($0010), high($000F), high($000E), high($000D), high($000C)
 
 ;Maps NTSC to NTSC tempo, maps PAL and Dendy to
 ;faster PAL tempo in song and sfx headers.
@@ -380,6 +381,20 @@ stream_callback_table_hi:
     .db high(stream_set_arpeggio_envelope)
     endif
 
+  ifdef FEATURE_ARPEGGIOS
+
+arpeggio_callback_table_lo:
+    .db low(arpeggio_absolute-1)
+    .db low(arpeggio_fixed-1)
+    .db low(arpeggio_relative-1)
+
+arpeggio_callback_table_hi:
+    .db high(arpeggio_absolute-1)
+    .db high(arpeggio_fixed-1)
+    .db high(arpeggio_relative-1)
+
+  endif
+
 ;****************************************************************
 ;These callbacks are all note playback and only execute once per
 ;frame.
@@ -403,60 +418,26 @@ square_1_play_note:
     lda [addr_arpeggio_envelopes],y
     sta sound_local_word_0+1
 
-    ldy stream_arpeggio_offset,x
-
+    ;Get arpeggio type.
+    ldy #0
     lda [sound_local_word_0],y
-    cmp #ENV_STOP
-    beq .arpeggio_stop
-    cmp #ENV_LOOP
-    beq .arpeggio_loop
-.arpeggio_play:
-
-    ;We're changing notes.
-    lda stream_flags,x
-    and #STREAM_PITCH_LOADED_CLEAR
-    sta stream_flags,x
-
-    ;Load the current arpeggio value and add it to current note.
-    clc
-    lda [sound_local_word_0],y
-    adc stream_byte
-    tay
-    ;Advance arpeggio offset.
-    inc stream_arpeggio_offset,x
-
-    jmp .arpeggio_done
-.arpeggio_stop:
-
-    ;Just load the current note.
-    ldy stream_byte
-
-    jmp .arpeggio_done
-.arpeggio_loop:
-
-    ;We hit a loop opcode, advance envelope index and load loop point.
-    iny
-    lda [sound_local_word_0],y
-    sta stream_arpeggio_offset,x
     tay
 
-    ;We're changing notes.
-    lda stream_flags,x
-    and #STREAM_PITCH_LOADED_CLEAR
-    sta stream_flags,x
-
-    ;Load the current arpeggio value and add it to current note.
-    clc
-    lda [sound_local_word_0],y
-    adc stream_byte
-    tay
-    ;Advance arpeggio offset.
-    inc stream_arpeggio_offset,x
-.arpeggio_done:
+    ;Get the address.
+    lda #high(.return_from_arpeggio_callback-1)
+    pha
+    lda #low(.return_from_arpeggio_callback-1)
+    pha
+    lda arpeggio_callback_table_hi,y
+    pha
+    lda arpeggio_callback_table_lo,y
+    pha
+    rts
+    .return_from_arpeggio_callback:
 
     else
 
-    ldy stream_byte
+    ldy stream_note,x
 
     endif
 
@@ -650,60 +631,26 @@ triangle_play_note:
     lda [addr_arpeggio_envelopes],y
     sta sound_local_word_0+1
 
-    ldy stream_arpeggio_offset,x
-
+    ;Get arpeggio type.
+    ldy #0
     lda [sound_local_word_0],y
-    cmp #ENV_STOP
-    beq .arpeggio_stop
-    cmp #ENV_LOOP
-    beq .arpeggio_loop
-.arpeggio_play:
-
-    ;We're changing notes.
-    lda stream_flags,x
-    and #STREAM_PITCH_LOADED_CLEAR
-    sta stream_flags,x
-
-    ;Load the current arpeggio value and add it to current note.
-    clc
-    lda [sound_local_word_0],y
-    adc stream_byte
-    tay
-    ;Advance arpeggio offset.
-    inc stream_arpeggio_offset,x
-
-    jmp .arpeggio_done
-.arpeggio_stop:
-
-    ;Just load the current note.
-    ldy stream_byte
-
-    jmp .arpeggio_done
-.arpeggio_loop:
-
-    ;We hit a loop opcode, advance envelope index and load loop point.
-    iny
-    lda [sound_local_word_0],y
-    sta stream_arpeggio_offset,x
     tay
 
-    ;We're changing notes.
-    lda stream_flags,x
-    and #STREAM_PITCH_LOADED_CLEAR
-    sta stream_flags,x
-
-    ;Load the current arpeggio value and add it to current note.
-    clc
-    lda [sound_local_word_0],y
-    adc stream_byte
-    tay
-    ;Advance arpeggio offset.
-    inc stream_arpeggio_offset,x
-.arpeggio_done:
+    ;Get the address.
+    lda #high(.return_from_arpeggio_callback-1)
+    pha
+    lda #low(.return_from_arpeggio_callback-1)
+    pha
+    lda arpeggio_callback_table_hi,y
+    pha
+    lda arpeggio_callback_table_lo,y
+    pha
+    rts
+    .return_from_arpeggio_callback:
 
     else
 
-    ldy stream_byte
+    ldy stream_note,x
 
     endif
 
@@ -836,78 +783,32 @@ noise_play_note:
     lda [addr_arpeggio_envelopes],y
     sta sound_local_word_0+1
 
-    ldy stream_arpeggio_offset,x
-
+    ;Get arpeggio type.
+    ldy #0
     lda [sound_local_word_0],y
-    cmp #ENV_STOP
-    beq .arpeggio_stop
-    cmp #ENV_LOOP
-    beq .arpeggio_loop
-.arpeggio_play:
-
-    ;We're changing notes.
-    lda stream_flags,x
-    and #STREAM_PITCH_LOADED_CLEAR
-    sta stream_flags,x
-
-    ;Load the current arpeggio value and use it as the current note.
-    clc
-    lda [sound_local_word_0],y
-    and #%01111111
-    sta sound_local_byte_0
-    ;Advance arpeggio offset.
-    inc stream_arpeggio_offset,x
-
-    jmp .done
-.arpeggio_stop:
-
-    ;On noise, when an arpeggio is done, we're changing notes to the
-    ;currently playing note. (This is FamiTracker's behavior)
-    ;However, we only do this if we're stopping at any point other
-    ;than zero, which indicates an arpeggio did in fact execute.
-    lda stream_arpeggio_offset,x
-    beq .skip_clear_pitch_loaded
-    lda stream_flags,x
-    and #STREAM_PITCH_LOADED_CLEAR
-    sta stream_flags,x
-.skip_clear_pitch_loaded:
-
-    ;Load note index. (really more of a "sound type" for noise)
-    lda stream_byte
-    and #%01111111
-    sta sound_local_byte_0
-
-    jmp .done
-.arpeggio_loop:
-
-    ;We hit a loop opcode, advance envelope index and load loop point.
-    iny
-    lda [sound_local_word_0],y
-    sta stream_arpeggio_offset,x
     tay
 
-    ;We're changing notes.
-    lda stream_flags,x
-    and #STREAM_PITCH_LOADED_CLEAR
-    sta stream_flags,x
-
-    ;Load the current arpeggio value and use it as the current note.
-    clc
-    lda [sound_local_word_0],y
-    and #%01111111
-    sta sound_local_byte_0
-    ;Advance arpeggio offset.
-    inc stream_arpeggio_offset,x
-.done:
+    ;Get the address.
+    lda #high(.return_from_arpeggio_callback-1)
+    pha
+    lda #low(.return_from_arpeggio_callback-1)
+    pha
+    lda arpeggio_callback_table_hi,y
+    pha
+    lda arpeggio_callback_table_lo,y
+    pha
+    rts
+    .return_from_arpeggio_callback:
 
     else
 
-    ;Load note index. (really more of a "sound type" for noise)
-    lda stream_byte
-    and #%01111111
-    sta sound_local_byte_0
+    ldy stream_note,x
 
     endif
+
+    tya
+    and #%01111111
+    sta sound_local_byte_0
 
     ;Skip loading note pitch if already loaded, to allow envelopes
     ;to modify the pitch.
@@ -1062,7 +963,7 @@ dpcm_play_note:
     bne note_already_played
 
     ;Load note index.
-    ldy stream_byte
+    ldy stream_note,x
 
     ;Get sample index.
     lda [addr_dpcm_note_to_sample_index],y
@@ -1074,7 +975,7 @@ dpcm_play_note:
     sta stream_channel_register_3,x
 
     ;Get loop and pitch from dpcm_note_to_loop_pitch_index table.
-    ldy stream_byte
+    ldy stream_note,x
     lda [addr_dpcm_note_to_loop_pitch_index],y
     sta stream_channel_register_1,x
 
@@ -1099,6 +1000,189 @@ no_sample:
 note_already_played:
 
     rts
+  endif
+
+  ifdef FEATURE_ARPEGGIOS
+
+arpeggio_absolute:
+
+    ldy stream_arpeggio_offset,x
+
+    lda [sound_local_word_0],y
+    cmp #ENV_STOP
+    beq .arpeggio_stop
+    cmp #ENV_LOOP
+    beq .arpeggio_loop
+.arpeggio_play:
+
+    ;We're changing notes.
+    lda stream_flags,x
+    and #STREAM_PITCH_LOADED_CLEAR
+    sta stream_flags,x
+
+    ;Load the current arpeggio value and add it to current note.
+    clc
+    lda [sound_local_word_0],y
+    adc stream_note,x
+    tay
+    ;Advance arpeggio offset.
+    inc stream_arpeggio_offset,x
+
+    jmp .done
+.arpeggio_stop:
+
+    ;Just load the current note.
+    ldy stream_note,x
+
+    jmp .done
+.arpeggio_loop:
+
+    ;We hit a loop opcode, advance envelope index and load loop point.
+    iny
+    lda [sound_local_word_0],y
+    sta stream_arpeggio_offset,x
+    tay
+
+    ;We're changing notes.
+    lda stream_flags,x
+    and #STREAM_PITCH_LOADED_CLEAR
+    sta stream_flags,x
+
+    ;Load the current arpeggio value and add it to current note.
+    clc
+    lda [sound_local_word_0],y
+    adc stream_note,x
+    tay
+    ;Advance arpeggio offset.
+    inc stream_arpeggio_offset,x
+.done:
+
+    rts
+
+arpeggio_fixed:
+
+    ldy stream_arpeggio_offset,x
+
+    lda [sound_local_word_0],y
+    cmp #ENV_STOP
+    beq .arpeggio_stop
+    cmp #ENV_LOOP
+    beq .arpeggio_loop
+.arpeggio_play:
+
+    ;We're changing notes.
+    lda stream_flags,x
+    and #STREAM_PITCH_LOADED_CLEAR
+    sta stream_flags,x
+
+    ;Load the current arpeggio value and use it as the current note.
+    lda [sound_local_word_0],y
+    ;sta stream_note,x
+    tay
+    ;Advance arpeggio offset.
+    inc stream_arpeggio_offset,x
+
+    jmp .done
+.arpeggio_stop:
+
+    ;When a fixed arpeggio is done, we're changing notes to the
+    ;currently playing note. (This is FamiTracker's behavior)
+    ;However, we only do this if we're stopping at any point other
+    ;than one, which indicates an arpeggio did in fact execute.
+    lda stream_arpeggio_offset,x
+    cmp #1
+    beq .skip_clear_pitch_loaded
+    lda stream_flags,x
+    and #STREAM_PITCH_LOADED_CLEAR
+    sta stream_flags,x
+.skip_clear_pitch_loaded:
+
+    ;Just load the current note.
+    ldy stream_note,x
+
+    jmp .done
+.arpeggio_loop:
+
+    ;We hit a loop opcode, advance envelope index and load loop point.
+    iny
+    lda [sound_local_word_0],y
+    sta stream_arpeggio_offset,x
+    tay
+
+    ;We're changing notes.
+    lda stream_flags,x
+    and #STREAM_PITCH_LOADED_CLEAR
+    sta stream_flags,x
+
+    ;Load the current arpeggio value and use it as the current note.
+    lda [sound_local_word_0],y
+    tay
+    ;Advance arpeggio offset.
+    inc stream_arpeggio_offset,x
+.done:
+
+    rts
+
+arpeggio_relative:
+
+    ldy stream_arpeggio_offset,x
+
+    lda [sound_local_word_0],y
+    cmp #ENV_STOP
+    beq .arpeggio_stop
+    cmp #ENV_LOOP
+    beq .arpeggio_loop
+.arpeggio_play:
+
+    ;We're changing notes.
+    lda stream_flags,x
+    and #STREAM_PITCH_LOADED_CLEAR
+    sta stream_flags,x
+
+    ;Load the current arpeggio value and add it to current note.
+    clc
+    lda [sound_local_word_0],y
+    adc stream_note,x
+    cmp #HIGHEST_NOTE
+    bmi .skip
+    lda #HIGHEST_NOTE
+    .skip:
+    sta stream_note,x
+    tay
+    ;Advance arpeggio offset.
+    inc stream_arpeggio_offset,x
+
+    jmp .done
+.arpeggio_stop:
+
+    ;Just load the current note.
+    ldy stream_note,x
+
+    jmp .done
+.arpeggio_loop:
+
+    ;We hit a loop opcode, advance envelope index and load loop point.
+    iny
+    lda [sound_local_word_0],y
+    sta stream_arpeggio_offset,x
+    tay
+
+    ;We're changing notes.
+    lda stream_flags,x
+    and #STREAM_PITCH_LOADED_CLEAR
+    sta stream_flags,x
+
+    ;Load the current arpeggio value and add it to current note.
+    clc
+    lda [sound_local_word_0],y
+    adc stream_note,x
+    tay
+    ;Advance arpeggio offset.
+    inc stream_arpeggio_offset,x
+.done:
+
+    rts
+
   endif
 
 ;****************************************************************
@@ -1135,7 +1219,7 @@ stream_set_arpeggio_envelope:
     ldy #0
     lda [sound_local_word_0],y
     sta stream_arpeggio_index,x
-    lda #0
+    lda #1
     sta stream_arpeggio_offset,x
 
     rts
@@ -1181,7 +1265,7 @@ stream_set_length_s:
 
     ;determine note length from opcode
     sec
-    lda stream_byte
+    lda stream_note,x
     sbc #OPCODES_BASE
     clc
     adc #1
@@ -1865,6 +1949,8 @@ starting_read_address = sound_param_word_0
     sta stream_duty_offset,x
     ifdef FEATURE_ARPEGGIOS
     sta stream_arpeggio_index,x
+    ;Set arpeggio offset to 1 because index 0 contains arpeggio type.
+    lda #1
     sta stream_arpeggio_offset,x
     endif
 
@@ -1927,14 +2013,18 @@ read_address = sound_local_word_1
 
     ;Load current read address of stream.
     lda stream_read_address_lo,x
-    sta read_address
+    sta <read_address
     lda stream_read_address_hi,x
-    sta read_address+1
+    sta <(read_address+1)
 
     ;Load next byte from stream data.
+    lda stream_flags,x
+    and #STREAM_PITCH_LOADED_TEST
+    bne .skip
     ldy #0
     lda [read_address],y
-    sta stream_byte
+    sta stream_note,x
+    .skip:
 
     ;Is this byte a note or a stream opcode?
     cmp #OPCODES_BASE
@@ -1945,9 +2035,9 @@ read_address = sound_local_word_1
     lda stream_channel,x
     tay
     lda channel_callback_table_lo,y
-    sta callback_address
+    sta <callback_address
     lda channel_callback_table_hi,y
-    sta callback_address+1
+    sta <(callback_address+1)
 
     ;Call the channel callback!
     jsr indirect_jsr_callback_address
@@ -1998,7 +2088,8 @@ read_address = sound_local_word_1
     sta stream_pitch_offset,x
     sta stream_duty_offset,x
     ifdef FEATURE_ARPEGGIOS
-    ;Reset arpeggio offset.
+    ;Set arpeggio offset to 1 because index 0 contains arpeggio type.
+    lda #1
     sta stream_arpeggio_offset,x
     endif
 
@@ -2012,7 +2103,7 @@ read_address = sound_local_word_1
     inc stream_read_address_lo,x
     bne .skip1
     inc stream_read_address_hi,x
-.skip1
+.skip1:
 .do_not_advance_note_length_counter:
 .note_length_counter_not_zero:
 
@@ -2035,7 +2126,7 @@ read_address = sound_local_word_1
     inc stream_read_address_lo,x
     bne .skip2
     inc stream_read_address_hi,x
-.skip2
+.skip2:
 
     ;Immediately process the next opcode or note. The idea here is that
     ;all stream control opcodes will execute during the current frame as "setup"

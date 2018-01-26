@@ -32,8 +32,6 @@ addr_dpcm_note_to_sample_length: .rs 2
 addr_dpcm_note_to_loop_pitch_index: .rs 2
   endif
 
-stream_byte: .rs 1
-
 apu_data_ready: .rs 1
 apu_square_1_old: .rs 1
 apu_square_2_old: .rs 1
