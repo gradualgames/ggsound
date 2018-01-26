@@ -170,7 +170,6 @@ sound_stop:
 ;ugly volume envelope transitions. DPCM is handled within this framework by
 ;a state machine that handles sound effect priority.
 sound_update:
-
     ;Save regs.
     txa
     pha
@@ -180,7 +179,7 @@ sound_update:
     sta apu_data_ready
 
     ;First copy all music streams.
-    ldx #0
+    tax
 @song_stream_register_copy_loop:
 
     ;Load whether this stream is active.
@@ -252,7 +251,6 @@ do_not_update_music:
     ;Restore regs.
     pla
     tax
-
     rts
 
 ;Note table borrowed from periods.s provided by FamiTracker's NSF driver.
@@ -2135,87 +2133,49 @@ sound_initialize_apu_buffer:
     ;Initialize Square 1
     ;****************************************************************
 
-    ;Set Saw Envelope Disable and Length Counter Disable to 1 for square 1.
+    ;Set Saw Envelope Disable and Length Counter Disable to 1 for squares 1 and 2.
     lda #%00110000
-    sta apu_register_sets
+    sta apu_register_sets;Square 1
+    sta apu_register_sets+4;Square 2
+    sta apu_register_sets+12;Noise
 
     ;Set Negate flag on the sweep unit.
     lda #$08
-    sta apu_register_sets+1
+    sta apu_register_sets+1;Square 1
+    sta apu_register_sets+5;Square 2
 
     ;Set period to C9, which is a C#...just in case nobody writes to it.
     lda #$C9
-    sta apu_register_sets+2
+    sta apu_register_sets+2;Square 1
+    sta apu_register_sets+6;Square 2
+    sta apu_register_sets+10;Triangle
 
     ;Make sure the old value starts out different from the first default value.
-    sta apu_square_1_old
-
-    lda #$00
-    sta apu_register_sets+3
-
-    ;****************************************************************
-    ;Initialize Square 2
-    ;****************************************************************
-
-    ;Set Saw Envelope Disable and Length Counter Disable to 1 for square 2.
-    lda #%00110000
-    sta apu_register_sets+4
-
-    ;Set Negate flag on the sweep unit.
-    lda #$08
-    sta apu_register_sets+5
-
-    ;Set period to C9, which is a C#...just in case nobody writes to it.
-    lda #$C9
-    sta apu_register_sets+6
-
-    ;Make sure the old value starts out different from the first default value.
-    sta apu_square_2_old
-
-    lda #$00
-    sta apu_register_sets+7
-
-    ;****************************************************************
-    ;Initialize Triangle
-    ;****************************************************************
+    sta apu_square_1_old;Square 1
+    sta apu_square_2_old;Square 2
+    
     lda #%10000000
-    sta apu_register_sets+8
-
-    lda #$C9
-    sta apu_register_sets+10
+    sta apu_register_sets+8;Triangle
 
     lda #$00
-    sta apu_register_sets+11
+    sta apu_register_sets+3;Square 1
+    sta apu_register_sets+7;Square 2
+    sta apu_register_sets+11;Triangle
 
-    ;****************************************************************
-    ;Initialize Noise
-    ;****************************************************************
-    lda #%00110000
-    sta apu_register_sets+12
-
-    lda #%00000000
     sta apu_register_sets+13
 
-    lda #%00000000
     sta apu_register_sets+14
 
-    lda #%00000000
     sta apu_register_sets+15
 
     ifdef FEATURE_DPCM
     ;****************************************************************
     ;Initialize DPCM
     ;****************************************************************
-    lda #0
+    ;lda #0;Taken care of above
     sta apu_register_sets+16
-
-    lda #0
     sta apu_register_sets+17
-
-    lda #0
     sta apu_register_sets+18
-
-    lda #0
     sta apu_register_sets+19
     endif
 
@@ -2315,7 +2275,6 @@ dpcm_wait:
     lda #DPCM_STATE_NOP
     sta apu_dpcm_state
 @skip_reset_apu_dpcm_state:
-    rts
 dpcm_nop:
     rts
 
@@ -2343,4 +2302,3 @@ dpcm_upload_registers:
     else
     rts
     endif
-
