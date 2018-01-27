@@ -1,4 +1,3 @@
-  LIST
 ;Expects sound_param_byte_0 to contain desired region (SOUND_REGION_NTSC, SOUND_REGION_PAL, SOUND_REGION_DENDY)
 ;Expects sound_param_word_0 to contain song list address.
 ;Expects sound_param_word_1 to contain sfx list address.
@@ -2028,7 +2027,35 @@ read_address = sound_local_word_1
 
     ;Is this byte a note or a stream opcode?
     cmp #OPCODES_BASE
-    bpl .process_opcode
+    bcc .process_note
+.process_opcode:
+
+    ;Look up the opcode in the stream callbacks table.
+    sec
+    sbc #OPCODES_BASE
+    tay
+    ;Get the address.
+    lda stream_callback_table_lo,y
+    sta callback_address
+    lda stream_callback_table_hi,y
+    sta callback_address+1
+    ;Call the callback!
+    jsr indirect_jsr_callback_address
+
+    ;Advance the stream's read address.
+    inc stream_read_address_lo,x
+    bne .skip2
+    inc stream_read_address_hi,x
+.skip2:
+
+    ;Immediately process the next opcode or note. The idea here is that
+    ;all stream control opcodes will execute during the current frame as "setup"
+    ;for the next note. All notes will execute once per frame and will always
+    ;return from this routine. This leaves the problem, how would the stream
+    ;control opcode "terminate" work? It works by pulling the current return
+    ;address off the stack and then performing an rts, effectively returning
+    ;from its caller, this routine.
+    jmp stream_update
 .process_note:
 
     ;Determine which channel callback to use.
@@ -2108,34 +2135,6 @@ read_address = sound_local_word_1
 .note_length_counter_not_zero:
 
     rts
-.process_opcode:
-
-    ;Look up the opcode in the stream callbacks table.
-    sec
-    sbc #OPCODES_BASE
-    tay
-    ;Get the address.
-    lda stream_callback_table_lo,y
-    sta callback_address
-    lda stream_callback_table_hi,y
-    sta callback_address+1
-    ;Call the callback!
-    jsr indirect_jsr_callback_address
-
-    ;Advance the stream's read address.
-    inc stream_read_address_lo,x
-    bne .skip2
-    inc stream_read_address_hi,x
-.skip2:
-
-    ;Immediately process the next opcode or note. The idea here is that
-    ;all stream control opcodes will execute during the current frame as "setup"
-    ;for the next note. All notes will execute once per frame and will always
-    ;return from this routine. This leaves the problem, how would the stream
-    ;control opcode "terminate" work? It works by pulling the current return
-    ;address off the stack and then performing an rts, effectively returning
-    ;from its caller, this routine.
-    jmp stream_update
 
 indirect_jsr_callback_address:
     jmp [callback_address]
