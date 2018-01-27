@@ -407,9 +407,7 @@ square_1_play_note:
 
     ifdef FEATURE_ARPEGGIOS
     ;Load arpeggio index.
-    lda stream_arpeggio_index,x
-    asl a
-    tay
+    ldy stream_arpeggio_index,x
     ;Load arpeggio address.
     lda [addr_arpeggio_envelopes],y
     sta sound_local_word_0
@@ -462,9 +460,7 @@ square_1_play_note:
     bne .silence_until_note
 .note_not_silenced:
     ;Load volume index.
-    lda stream_volume_index,x
-    asl a
-    tay
+    ldy stream_volume_index,x
     ;Load volume address.
     lda [addr_volume_envelopes],y
     sta sound_local_word_0
@@ -513,9 +509,7 @@ square_1_play_note:
 .done:
 
     ;Load pitch index.
-    lda stream_pitch_index,x
-    asl a
-    tay
+    ldy stream_pitch_index,x
     ;Load pitch address.
     lda [addr_pitch_envelopes],y
     sta sound_local_word_0
@@ -574,9 +568,7 @@ square_1_play_note:
 
 .duty_code:
     ;Load duty index.
-    lda stream_duty_index,x
-    asl a
-    tay
+    ldy stream_duty_index,x
     ;Load duty address.
     lda [addr_duty_envelopes],y
     sta sound_local_word_0
@@ -620,9 +612,7 @@ triangle_play_note:
 
     ifdef FEATURE_ARPEGGIOS
     ;Load arpeggio index.
-    lda stream_arpeggio_index,x
-    asl a
-    tay
+    ldy stream_arpeggio_index,x
     ;Load arpeggio address.
     lda [addr_arpeggio_envelopes],y
     sta sound_local_word_0
@@ -671,9 +661,7 @@ triangle_play_note:
 .pitch_already_loaded:
 
     ;Load volume index.
-    lda stream_volume_index,x
-    asl a
-    tay
+    ldy stream_volume_index,x
     ;Load volume address.
     lda [addr_volume_envelopes],y
     sta sound_local_word_0
@@ -707,9 +695,7 @@ triangle_play_note:
 .volume_stop:
 
     ;Load pitch index.
-    lda stream_pitch_index,x
-    asl a
-    tay
+    ldy stream_pitch_index,x
     ;Load pitch address.
     lda [addr_pitch_envelopes],y
     sta sound_local_word_0
@@ -772,9 +758,7 @@ noise_play_note:
 
     ifdef FEATURE_ARPEGGIOS
     ;Load arpeggio index.
-    lda stream_arpeggio_index,x
-    asl a
-    tay
+    ldy stream_arpeggio_index,x
     ;Load arpeggio address.
     lda [addr_arpeggio_envelopes],y
     sta sound_local_word_0
@@ -824,9 +808,7 @@ noise_play_note:
 .pitch_already_loaded:
 
     ;Load volume index.
-    lda stream_volume_index,x
-    asl a
-    tay
+    ldy stream_volume_index,x
     ;Load volume address.
     lda [addr_volume_envelopes],y
     sta sound_local_word_0
@@ -860,9 +842,7 @@ noise_play_note:
 .volume_stop:
 
     ;Load pitch index.
-    lda stream_pitch_index,x
-    asl a
-    tay
+    ldy stream_pitch_index,x
     ;Load pitch address.
     lda [addr_pitch_envelopes],y
     sta sound_local_word_0
@@ -908,10 +888,7 @@ noise_play_note:
 
 duty_code:
     ;Load duty index.
-    lda stream_duty_index,x
-
-    asl a
-    tay
+    ldy stream_duty_index,x
     ;Load duty address.
     lda [addr_duty_envelopes],y
     sta sound_local_word_0
@@ -1199,6 +1176,7 @@ stream_set_volume_envelope:
     sta sound_local_word_0+1
     ldy #0
     lda [sound_local_word_0],y
+    asl a
     sta stream_volume_index,x
     lda #0
     sta stream_volume_offset,x
@@ -1217,6 +1195,7 @@ stream_set_arpeggio_envelope:
     sta sound_local_word_0+1
     ldy #0
     lda [sound_local_word_0],y
+    asl a
     sta stream_arpeggio_index,x
     lda #1
     sta stream_arpeggio_offset,x
@@ -1235,6 +1214,7 @@ stream_set_pitch_envelope:
     sta sound_local_word_0+1
     ldy #0
     lda [sound_local_word_0],y
+    asl a
     sta stream_pitch_index,x
     lda #0
     sta stream_pitch_offset,x
@@ -1251,6 +1231,7 @@ stream_set_duty_envelope:
     sta sound_local_word_0+1
     ldy #0
     lda [sound_local_word_0],y
+    asl a
     sta stream_duty_index,x
     lda #0
     sta stream_duty_offset,x

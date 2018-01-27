@@ -492,9 +492,7 @@ stream_callback_table_hi: .hibytes stream_callback_table
 
     .ifdef FEATURE_ARPEGGIOS
     ;Load arpeggio index.
-    lda stream_arpeggio_index,x
-    asl
-    tay
+    ldy stream_arpeggio_index,x
     ;Load arpeggio address.
     lda (base_address_arpeggio_envelopes),y
     sta sound_local_word_0
@@ -548,9 +546,7 @@ pitch_already_loaded:
     bne silence_until_note
 note_not_silenced:
     ;Load volume index.
-    lda stream_volume_index,x
-    asl
-    tay
+    ldy stream_volume_index,x
     ;Load volume address.
     lda (base_address_volume_envelopes),y
     sta sound_local_word_0
@@ -600,9 +596,7 @@ done:
     .endscope
 
     ;Load pitch index.
-    lda stream_pitch_index,x
-    asl
-    tay
+    ldy stream_pitch_index,x
     ;Load pitch address.
     lda (base_address_pitch_envelopes),y
     sta sound_local_word_0
@@ -661,9 +655,7 @@ pitch_stop:
 
 duty_code:
     ;Load duty index.
-    lda stream_duty_index,x
-    asl
-    tay
+    ldy stream_duty_index,x
     ;Load duty address.
     lda (base_address_duty_envelopes),y
     sta sound_local_word_0
@@ -709,9 +701,7 @@ square_2_play_note = square_1_play_note
 
     .ifdef FEATURE_ARPEGGIOS
     ;Load arpeggio index.
-    lda stream_arpeggio_index,x
-    asl
-    tay
+    ldy stream_arpeggio_index,x
     ;Load arpeggio address.
     lda (base_address_arpeggio_envelopes),y
     sta sound_local_word_0
@@ -760,9 +750,7 @@ square_2_play_note = square_1_play_note
 pitch_already_loaded:
 
     ;Load volume index.
-    lda stream_volume_index,x
-    asl
-    tay
+    ldy stream_volume_index,x
     ;Load volume address.
     lda (base_address_volume_envelopes),y
     sta sound_local_word_0
@@ -796,9 +784,7 @@ skip_volume_loop:
 volume_stop:
 
     ;Load pitch index.
-    lda stream_pitch_index,x
-    asl
-    tay
+    ldy stream_pitch_index,x
     ;Load pitch address.
     lda (base_address_pitch_envelopes),y
     sta sound_local_word_0
@@ -863,9 +849,7 @@ pitch_stop:
 
     .ifdef FEATURE_ARPEGGIOS
     ;Load arpeggio index.
-    lda stream_arpeggio_index,x
-    asl
-    tay
+    ldy stream_arpeggio_index,x
     ;Load arpeggio address.
     lda (base_address_arpeggio_envelopes),y
     sta sound_local_word_0
@@ -915,9 +899,7 @@ pitch_stop:
 pitch_already_loaded:
 
     ;Load volume index.
-    lda stream_volume_index,x
-    asl
-    tay
+    ldy stream_volume_index,x
     ;Load volume address.
     lda (base_address_volume_envelopes),y
     sta sound_local_word_0
@@ -951,9 +933,7 @@ skip_volume_loop:
 volume_stop:
 
     ;Load pitch index.
-    lda stream_pitch_index,x
-    asl
-    tay
+    ldy stream_pitch_index,x
     ;Load pitch address.
     lda (base_address_pitch_envelopes),y
     sta sound_local_word_0
@@ -999,10 +979,7 @@ pitch_stop:
 
 duty_code:
     ;Load duty index.
-    lda stream_duty_index,x
-
-    asl
-    tay
+    ldy stream_duty_index,x
     ;Load duty address.
     lda (base_address_duty_envelopes),y
     sta sound_local_word_0
@@ -1300,6 +1277,7 @@ done:
     sta sound_local_word_0+1
     ldy #0
     lda (sound_local_word_0),y
+    asl
     sta stream_volume_index,x
     lda #0
     sta stream_volume_offset,x
@@ -1319,6 +1297,7 @@ done:
     sta sound_local_word_0+1
     ldy #0
     lda (sound_local_word_0),y
+    asl
     sta stream_arpeggio_index,x
     ;Set arpeggio offset to 1 because index 0 contains arpeggio type.
     lda #1
@@ -1340,6 +1319,7 @@ done:
     sta sound_local_word_0+1
     ldy #0
     lda (sound_local_word_0),y
+    asl
     sta stream_pitch_index,x
     lda #0
     sta stream_pitch_offset,x
@@ -1357,6 +1337,7 @@ done:
     sta sound_local_word_0+1
     ldy #0
     lda (sound_local_word_0),y
+    asl
     sta stream_duty_index,x
     lda #0
     sta stream_duty_offset,x
