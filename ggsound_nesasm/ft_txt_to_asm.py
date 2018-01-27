@@ -128,7 +128,7 @@ def generate_stream(track, order, channel, speed):
         last_note = note_info[1]
         jump_frame = note_info[2]
 
-        if track["name"].startswith("sfx_") and note_length == len(track_rows) and instrument is -1:
+        if track["name"].startswith("_sfx_") and note_length == len(track_rows) and instrument is -1:
             #In this case, we don't want to generate any stream data. This stream is completely empty.
             break
 
@@ -192,7 +192,7 @@ def generate_stream(track, order, channel, speed):
                 #have to reset the note length again. This covers the case of more than
                 #one ultra long note after another.
                 current_note_length = 0
-            elif not track["name"].startswith("sfx_") and real_note_length >= 1 and real_note_length <= 16:
+            elif not track["name"].startswith("_sfx_") and real_note_length >= 1 and real_note_length <= 16:
                 #output special note length opcodes for songs, but not for sound effects
                 note_output.append("SL%s" % (format(real_note_length, "X")[-1]))
                 current_note_length = note_length
@@ -320,12 +320,14 @@ def generate_asm_from_bytes(bytes, bytes_per_line, start_line=define_byte_direct
 
 
 def sanitize_label(label):
-    sanitized_label = label
-    bad_characters = " ~`!@#$%^&()-+=}]{[,."
-    replacement_characters = "_abcdefghijklmnopqrstuvwxyz"
-    for i in range(0, len(bad_characters)):
-        sanitized_label = sanitized_label.replace("\"", "").replace(bad_characters[i], replacement_characters[i])
-    return sanitized_label
+    new_label = "_"
+    allowed_characters = "_abcdefghijklmnopqrstuvwxyz0123456789"
+    for c in label:
+        if c not in allowed_characters:
+            new_label = new_label + "%x" % ord(c)
+        else:
+            new_label = new_label + c
+    return new_label
 
 
 def main():
@@ -399,7 +401,7 @@ def main():
                 current_track["speed"] = int(track_split_line[2])
                 current_track["tempo"] = int(track_split_line[3])
                 current_track["name"] = sanitize_label(track_separate_params_name[1])
-                if current_track["name"].startswith("sfx_"):
+                if current_track["name"].startswith("_sfx_"):
                     sfx_tracks.append(current_track)
                 else:
                     song_tracks.append(current_track)
@@ -450,7 +452,7 @@ def main():
                 split_line = split_params_name[0].split()
 
                 current_dpcm_sample["length"] = int(split_line[2])
-                current_dpcm_sample["name"] = "dpcm_sample_" + sanitize_label(split_params_name[1])
+                current_dpcm_sample["name"] = "dpcm_sample" + sanitize_label(split_params_name[1])
                 current_dpcm_sample["data"] = []
 
                 dpcm_samples.append(current_dpcm_sample)
@@ -546,13 +548,13 @@ def main():
         if len(song_tracks) > 0:
             #song enum
             for i in range(0, len(song_tracks)):
-                f.write("song_index_%s = %s\n" % (song_tracks[i]["name"], i))
+                f.write("song_index%s = %s\n" % (song_tracks[i]["name"], i))
             f.write("\n")
 
         if len(sfx_tracks) > 0:
             #sfx enum
             for i in range(0, len(sfx_tracks)):
-                f.write("sfx_index_%s = %s\n" % (sfx_tracks[i]["name"], i))
+                f.write("sfx_index%s = %s\n" % (sfx_tracks[i]["name"], i))
             f.write("\n")
 
         if len(song_tracks) > 0:
@@ -678,7 +680,7 @@ def main():
         #all tracks
         for track in all_tracks:
             is_sfx = False
-            if track["name"].startswith("sfx_"):
+            if track["name"].startswith("_sfx_"):
                 is_sfx = True
             #header
 
