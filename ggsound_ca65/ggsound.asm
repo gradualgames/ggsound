@@ -482,7 +482,7 @@ arpeggio_callback_table_hi:
     lda arpeggio_callback_table_lo,y
     pha
     rts
-    return_from_arpeggio_callback:
+return_from_arpeggio_callback:
 
     .else
 
@@ -668,7 +668,7 @@ square_2_play_note = square_1_play_note
     lda arpeggio_callback_table_lo,y
     pha
     rts
-    return_from_arpeggio_callback:
+return_from_arpeggio_callback:
 
     .else
 
@@ -800,7 +800,7 @@ pitch_stop:
     lda arpeggio_callback_table_lo,y
     pha
     rts
-    return_from_arpeggio_callback:
+return_from_arpeggio_callback:
 
     .else
 
