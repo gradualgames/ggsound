@@ -25,6 +25,7 @@ silent_volume_index = None
 default_arpeggio_index = None
 flat_pitch_index = None
 default_duty_index = None
+silent_instrument_index = None
 instruments = []
 instrument_id_to_index = {-1: -1}
 song_tracks = []
@@ -97,14 +98,12 @@ def generate_stream(track, order, channel, speed):
     global default_arpeggio_index
     global flat_pitch_index
     global default_duty_index
+    global silent_instrument_index
     global instrument_id_to_index
 
     i = 0
     jump_frame = 0
-    current_volume = None
-    current_arpeggio = None
-    current_pitch = None
-    current_duty = None
+    current_instrument = None
     current_note_length = None
     stream_is_silent = True
     stream = []
@@ -132,54 +131,19 @@ def generate_stream(track, order, channel, speed):
             #In this case, we don't want to generate any stream data. This stream is completely empty.
             break
 
-        volume = arpeggio = pitch = duty = -1
-        if instrument is not -1:
-            volume = instruments[instrument]["volume"]
-            arpeggio = instruments[instrument]["arpeggio"]
-            pitch = instruments[instrument]["pitch"]
-            duty = instruments[instrument]["duty"]
-
         note_output = []
 
         #If the note is none, change the note settings to use a silent volume envelope (which we output while generating
         #final asm file), and no pitch or duty envelope, and an arbitrary note. We use A0.
         if note is None:
             note = "A0"
-            volume = silent_volume_index
-            arpeggio = default_arpeggio_index
-            pitch = flat_pitch_index
-            duty = default_duty_index
+            instrument = silent_instrument_index
 
-        if volume == -1:
-            volume = silent_volume_index
+        if instrument != current_instrument:
+            note_output.append("STI,%s" % (instrument))
+            current_instrument = instrument
 
-        if arpeggio == -1:
-            arpeggio = default_arpeggio_index
-
-        if duty == -1:
-            duty = default_duty_index
-
-        if pitch == -1:
-            pitch = flat_pitch_index
-
-        if volume != current_volume:
-            note_output.append("STV,%s" % (volume))
-            current_volume = volume
-
-        if arpeggio != current_arpeggio:
-            if ARPEGGIOS_ENABLED:
-                note_output.append("SAR,%s" % (arpeggio))
-            current_arpeggio = arpeggio
-
-        if pitch != current_pitch:
-            note_output.append("STP,%s" % (pitch))
-            current_pitch = pitch
-
-        if duty != current_duty:
-            note_output.append("SDU,%s" % (duty))
-            current_duty = duty
-
-        if current_volume != silent_volume_index:
+        if current_instrument != silent_instrument_index:
             stream_is_silent = False
 
         if note_length != current_note_length:
@@ -218,13 +182,14 @@ def generate_stream(track, order, channel, speed):
 #envelope settings prior to the last note, finds the one with the greatest length, and
 #sets the last note length to this value. Then the stream can be used as a sound effect.
 def convert_stream_to_sfx(stream):
+    global silent_instrument_index
     #first search for last silent note and delete it and everything after it
     if len(stream) == 0:
         return
     silent_note_index = -1
     for i in range(len(stream) - 1, 0, -1):
         for j in range(0, len(stream[i])):
-            if stream[i][j] == "STV,%s" % silent_volume_index:
+            if stream[i][j] == "STI,%s" % silent_instrument_index:
                 silent_note_index = i
                 break
     if silent_note_index != -1:
@@ -244,22 +209,19 @@ def convert_stream_to_sfx(stream):
     last_note_arpeggio_index = None
     last_note_pitch_index = None
     last_note_duty_index = None
+    last_instrument_index = None
     for i in range(len(stream) - 1, -1, -1):
         note = stream[i]
         for opcode in note:
             split_opcode = opcode.split(",")
             if len(split_opcode) == 2:
-                envelope_opcode = split_opcode[0]
-                envelope_index = int(split_opcode[1])
-                if last_note_volume_index == None and envelope_opcode == "STV":
-                    last_note_volume_index = envelope_index
-                if last_note_arpeggio_index == None and envelope_opcode == "STA":
-                    last_note_arpeggio_index = envelope_index
-                if last_note_pitch_index == None and envelope_opcode == "STP":
-                    last_note_pitch_index = envelope_index
-                if last_note_duty_index == None and envelope_opcode == "SDU":
-                    last_note_duty_index = envelope_index
-
+                instrument_opcode = split_opcode[0]
+                instrument_index = int(split_opcode[1])
+                if last_instrument_index == None and instrument_opcode == "STI":
+                    last_note_volume_index = instruments[instrument_index]["volume"]
+                    last_note_pitch_index = instruments[instrument_index]["pitch"]
+                    last_note_duty_index = instruments[instrument_index]["duty"]
+                    last_note_arpeggio_index = instruments[instrument_index]["arpeggio"]
 
     #find max envelope length on last note
     max_envelope_length = 0
@@ -340,6 +302,7 @@ def main():
     global default_arpeggio_index
     global flat_pitch_index
     global default_duty_index
+    global silent_instrument_index
     global define_byte_directive
 
     if len(sys.argv) != 2:
@@ -387,6 +350,7 @@ def main():
 
                 instrument["id"] = int(inst_split_line[1])
                 instrument["index"] = instruments.index(instrument)
+                instrument["name"] = "%s_%s" % ("_".join(inst_split_line[7:]).replace("\"", ""), instrument["index"])
                 instrument_id_to_index[instrument["id"]] = instrument["index"]
 
             if split_line[0] == "TRACK":
@@ -522,6 +486,16 @@ def main():
     macro["sub_type"] = 0
     macros["duty"].append(macro)
 
+    #add a silent instrument
+    instrument = {}
+    silent_instrument_index = len(instruments)
+    instrument["name"] = "silent_%s" % silent_instrument_index
+    instrument["volume"] = silent_volume_index
+    instrument["arpeggio"] = default_arpeggio_index
+    instrument["pitch"] = flat_pitch_index
+    instrument["duty"] = default_duty_index
+    instruments.append(instrument)
+
     #generate dpcm sample file, if we have any dpcm samples
     #we assume the user will place this data at a 64 byte aligned location. All
     #the samples after that are guaranteed to be aligned to 64 byte positions
@@ -571,14 +545,12 @@ def main():
                 f.write("%s%s\n" % (define_word_directive, track["name"]))
             f.write("\n")
 
-        #envelope lut lut
-        f.write("envelopes_list:\n")
-        f.write("%svolume\n" % define_word_directive)
-        if ARPEGGIOS_ENABLED:
-            f.write("%sarpeggio\n" % define_word_directive)
-        f.write("%spitch\n" % define_word_directive)
-        f.write("%sduty\n" % define_word_directive)
-        f.write("\n")
+        if len(instruments) > 0:
+            #instrument list
+            f.write("instrument_list:\n")
+            for instrument in instruments:
+                f.write("%s%s\n" % (define_word_directive, instrument["name"]))
+            f.write("\n")
 
         #dpcm lut lut
         if len(dpcm_samples):
@@ -589,50 +561,63 @@ def main():
             f.write("%sdpcm_note_to_loop_pitch_index\n" % define_word_directive)
             f.write("\n")
 
-        #envelope luts
-        envelope_luts =["volume", "pitch", "duty"]
-        if ARPEGGIOS_ENABLED:
-            envelope_luts.insert(1, "arpeggio")
-        for env in envelope_luts:
-            f.write(env + ":\n")
-            for macro in macros[env]:
-                f.write("%s%s%s\n" % (define_word_directive, env, str(macro["index"])))
-            f.write("\n")
+        #instruments
+        for instrument in instruments:
+            instrument_name = instrument["name"]
 
-        #envelopes themselves
-        envelope_luts =["volume", "pitch"]
-        if ARPEGGIOS_ENABLED:
-            envelope_luts.insert(1, "arpeggio")
-        for env in envelope_luts:
-            for macro in macros[env]:
-                f.write(env + str(macro["index"]) + ":\n")
-                f.write("%s" % define_byte_directive)
-                if env == "arpeggio":
-                    arp_type_code = arpeggio_sub_type_to_str[macro["sub_type"]]
-                    f.write("%s," % arp_type_code)
+            volume_macro = macros["volume"][instrument["volume"]]
+            pitch_macro = macros["pitch"][instrument["pitch"]]
+            duty_macro = macros["duty"][instrument["duty"]]
+            arpeggio_macro = macros["arpeggio"][instrument["arpeggio"]]
+
+            loop_point_offset = 3
+            if ARPEGGIOS_ENABLED:
+                loop_point_offset = 5
+            instrument_asm = []
+            instrument_offsets = []
+
+            instrument_macros = [volume_macro, pitch_macro, duty_macro]
+            if ARPEGGIOS_ENABLED:
+                instrument_macros.append(arpeggio_macro)
+            prefixes = ["", "", "DUTY_", ""]
+            value_lambdas = [lambda v: v, lambda v: v, lambda v: v << 6, lambda v: v]
+
+            for i in range(0, len(instrument_macros)):
+                macro = instrument_macros[i]
+                macro_length = 0
+                prefix = prefixes[i]
+                value_lambda = value_lambdas[i]
+                instrument_asm.append(define_byte_directive)
+                instrument_offsets.append(loop_point_offset)
                 for value in macro["values"]:
-                    f.write(str(value) + ",")
+                    instrument_asm.append("%s," % value_lambda(value))
+                    macro_length += 1
                 if macro["loop_point"] == -1:
-                    f.write("ENV_STOP\n")
+                    instrument_asm.append("%sENV_STOP\n" % prefix)
+                    macro_length += 1
                 else:
-                    if env == "arpeggio":
-                        macro["loop_point"] = macro["loop_point"] + 1
-                    f.write("ENV_LOOP,%s\n" % macro["loop_point"])
-            f.write("\n")
+                    instrument_asm.append("%sENV_LOOP,%s\n" % (prefix, macro["loop_point"] + loop_point_offset))
+                    macro_length += 2
+                loop_point_offset += macro_length
 
-        #duty envelopes require special handling
-        for macro in macros["duty"]:
-            f.write("duty" + str(macro["index"]) + ":\n")
-            f.write("%s" % define_byte_directive)
-            for value in macro["values"]:
-                #Duty cycle values are shifted into their proper bit position for ORing into
-                #channel control register (used by sound engine)
-                f.write(str(value << 6) + ",")
-            if macro["loop_point"] == -1:
-                f.write("DUTY_ENV_STOP\n")
+            f.write("%s:\n" % instrument_name)
+            f.write(define_byte_directive)
+            f.write("%s," % instrument_offsets[0])
+            f.write("%s," % instrument_offsets[1])
+            f.write("%s" % instrument_offsets[2])
+            if ARPEGGIOS_ENABLED:
+                f.write(",%s," % instrument_offsets[3])
+                f.write("%s" % arpeggio_sub_type_to_str[arpeggio_macro["sub_type"]])
+            f.write("\n")
+            total_instrument_length = 4 + len(instrument_asm)
+            if total_instrument_length <= 256:
+                print("Output instrument: \"%s\" total length: %s" % (instrument_name, total_instrument_length))
+                for byte in instrument_asm:
+                    f.write(byte)
             else:
-                f.write("DUTY_ENV_LOOP,%s\n" % macro["loop_point"])
-        f.write("\n")
+                print("ERROR: Instrument %s could not fit into 256 bytes. To work around this, create two instruments with shorter envelopes where one instrument continues into the next.")
+
+            f.write("\n")
 
         if len(dpcm_samples):
             #dpcm sample lut

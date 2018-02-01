@@ -149,9 +149,9 @@ reset:
     sta sound_param_word_1
     lda #>sfx_list
     sta sound_param_word_1+1
-    lda #<envelopes_list
+    lda #<instrument_list
     sta sound_param_word_2
-    lda #>envelopes_list
+    lda #>instrument_list
     sta sound_param_word_2+1
     lda #<dpcm_list
     sta sound_param_word_3

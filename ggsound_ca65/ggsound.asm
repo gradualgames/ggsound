@@ -22,12 +22,7 @@ sound_param_word_1: .res 2
 sound_param_word_2: .res 2
 sound_param_word_3: .res 2
 
-base_address_volume_envelopes: .res 2
-.ifdef FEATURE_ARPEGGIOS
-base_address_arpeggio_envelopes: .res 2
-.endif
-base_address_pitch_envelopes:  .res 2
-base_address_duty_envelopes:   .res 2
+base_address_instruments: .res 2
 base_address_note_table_lo: .res 2
 base_address_note_table_hi: .res 2
 .ifdef FEATURE_DPCM
@@ -57,15 +52,12 @@ stream_note_length_lo:         .res MAX_STREAMS
 stream_note_length_hi:         .res MAX_STREAMS
 stream_note_length_counter_lo: .res MAX_STREAMS
 stream_note_length_counter_hi: .res MAX_STREAMS
-stream_volume_index:           .res MAX_STREAMS
+stream_instrument_index:       .res MAX_STREAMS
 stream_volume_offset:          .res MAX_STREAMS
 .ifdef FEATURE_ARPEGGIOS
-stream_arpeggio_index:         .res MAX_STREAMS
 stream_arpeggio_offset:        .res MAX_STREAMS
 .endif
-stream_pitch_index:            .res MAX_STREAMS
 stream_pitch_offset:           .res MAX_STREAMS
-stream_duty_index:             .res MAX_STREAMS
 stream_duty_offset:            .res MAX_STREAMS
 
 stream_channel:                .res MAX_STREAMS
@@ -89,7 +81,7 @@ stream_tempo_hi:               .res MAX_STREAMS
 ;Expects sound_param_byte_0 to contain desired region (SOUND_REGION_NTSC, SOUND_REGION_PAL, SOUND_REGION_DENDY)
 ;Expects sound_param_word_0 to contain song list address.
 ;Expects sound_param_word_1 to contain sfx list address.
-;Expects sound_param_word_2 to contain envelopes list address.
+;Expects sound_param_word_2 to contain instrument list address.
 ;If FEATURE_DPCM is defined, then
 ;Expects sound_param_word_3 to contain dpcm sample address.
 .proc sound_initialize
@@ -100,49 +92,23 @@ stream_tempo_hi:               .res MAX_STREAMS
     lda sound_param_byte_0
     sta sound_region
 
+    ;Get songs address.
     lda sound_param_word_0
     sta song_list_address
     lda sound_param_word_0+1
     sta song_list_address+1
 
+    ;Get sfx address.
     lda sound_param_word_1
     sta sfx_list_address
     lda sound_param_word_1+1
     sta sfx_list_address+1
 
-    ;Get volume envelopes address.
-    ldy #0
-    lda (sound_param_word_2),y
-    sta base_address_volume_envelopes
-    iny
-    lda (sound_param_word_2),y
-    sta base_address_volume_envelopes+1
-
-    .ifdef FEATURE_ARPEGGIOS
-    ;Get arpeggio envelopes address.
-    iny
-    lda (sound_param_word_2),y
-    sta base_address_arpeggio_envelopes
-    iny
-    lda (sound_param_word_2),y
-    sta base_address_arpeggio_envelopes+1
-    .endif
-
-    ;Get pitch envelopes address.
-    iny
-    lda (sound_param_word_2),y
-    sta base_address_pitch_envelopes
-    iny
-    lda (sound_param_word_2),y
-    sta base_address_pitch_envelopes+1
-
-    ;Get duty envelopes address.
-    iny
-    lda (sound_param_word_2),y
-    sta base_address_duty_envelopes
-    iny
-    lda (sound_param_word_2),y
-    sta base_address_duty_envelopes+1
+    ;Get instruments address.
+    lda sound_param_word_2
+    sta base_address_instruments
+    lda sound_param_word_2+1
+    sta base_address_instruments+1
 
     .ifdef FEATURE_DPCM
     ;Get dpcm samples list.
@@ -426,14 +392,11 @@ channel_callback_table_hi: .hibytes channel_callback_table
     stream_set_length_s, \
     stream_set_length_lo, \
     stream_set_length_hi, \
-    stream_set_volume_envelope, \
-    stream_set_pitch_envelope, \
-    stream_set_duty_envelope, \
+    stream_set_instrument, \
     stream_goto, \
     stream_call, \
     stream_return, \
-    stream_terminate, \
-    stream_set_arpeggio_envelope
+    stream_terminate
 
 arpeggio_callback_table_lo:
     .byte <(arpeggio_absolute-1)
@@ -466,9 +429,7 @@ arpeggio_callback_table_hi:
     stream_set_length_s, \
     stream_set_length_lo, \
     stream_set_length_hi, \
-    stream_set_volume_envelope, \
-    stream_set_pitch_envelope, \
-    stream_set_duty_envelope, \
+    stream_set_instrument, \
     stream_goto, \
     stream_call, \
     stream_return, \
@@ -486,22 +447,23 @@ stream_callback_table_hi: .hibytes stream_callback_table
 
 .proc square_1_play_note
 
+    ;Load instrument index.
+    ldy stream_instrument_index,x
+    ;Load instrument address.
+    lda (base_address_instruments),y
+    sta sound_local_word_0
+    iny
+    lda (base_address_instruments),y
+    sta sound_local_word_0+1
+
     ;Set negate flag for sweep unit.
     lda #$08
     sta stream_channel_register_2,x
 
     .ifdef FEATURE_ARPEGGIOS
-    ;Load arpeggio index.
-    ldy stream_arpeggio_index,x
-    ;Load arpeggio address.
-    lda (base_address_arpeggio_envelopes),y
-    sta sound_local_word_0
-    iny
-    lda (base_address_arpeggio_envelopes),y
-    sta sound_local_word_0+1
 
     ;Get arpeggio type.
-    ldy #0
+    ldy #instrument_header::arpeggio_type
     lda (sound_local_word_0),y
     tay
 
@@ -545,14 +507,7 @@ pitch_already_loaded:
     and #STREAM_SILENCE_TEST
     bne silence_until_note
 note_not_silenced:
-    ;Load volume index.
-    ldy stream_volume_index,x
-    ;Load volume address.
-    lda (base_address_volume_envelopes),y
-    sta sound_local_word_0
-    iny
-    lda (base_address_volume_envelopes),y
-    sta sound_local_word_0+1
+
     ;Load volume offset.
     ldy stream_volume_offset,x
 
@@ -595,14 +550,6 @@ silence_until_note:
 done:
     .endscope
 
-    ;Load pitch index.
-    ldy stream_pitch_index,x
-    ;Load pitch address.
-    lda (base_address_pitch_envelopes),y
-    sta sound_local_word_0
-    iny
-    lda (base_address_pitch_envelopes),y
-    sta sound_local_word_0+1
     ;Load pitch offset.
     ldy stream_pitch_offset,x
 
@@ -654,15 +601,7 @@ pitch_delta_test_done:
 pitch_stop:
 
 duty_code:
-    ;Load duty index.
-    ldy stream_duty_index,x
-    ;Load duty address.
-    lda (base_address_duty_envelopes),y
-    sta sound_local_word_0
-    iny
-    lda (base_address_duty_envelopes),y
-    sta sound_local_word_0+1
-    ;Load duty offset.
+
     ldy stream_duty_offset,x
 
     ;Load duty value for this frame, but hard code flags and duty for now.
@@ -699,18 +638,18 @@ square_2_play_note = square_1_play_note
 
 .proc triangle_play_note
 
-    .ifdef FEATURE_ARPEGGIOS
-    ;Load arpeggio index.
-    ldy stream_arpeggio_index,x
-    ;Load arpeggio address.
-    lda (base_address_arpeggio_envelopes),y
+    ;Load instrument index.
+    ldy stream_instrument_index,x
+    ;Load instrument address.
+    lda (base_address_instruments),y
     sta sound_local_word_0
     iny
-    lda (base_address_arpeggio_envelopes),y
+    lda (base_address_instruments),y
     sta sound_local_word_0+1
 
+    .ifdef FEATURE_ARPEGGIOS
     ;Get arpeggio type.
-    ldy #0
+    ldy #instrument_header::arpeggio_type
     lda (sound_local_word_0),y
     tay
 
@@ -749,14 +688,6 @@ square_2_play_note = square_1_play_note
     sta stream_channel_register_4,x
 pitch_already_loaded:
 
-    ;Load volume index.
-    ldy stream_volume_index,x
-    ;Load volume address.
-    lda (base_address_volume_envelopes),y
-    sta sound_local_word_0
-    iny
-    lda (base_address_volume_envelopes),y
-    sta sound_local_word_0+1
     ;Load volume offset.
     ldy stream_volume_offset,x
 
@@ -783,14 +714,6 @@ skip_volume_loop:
 
 volume_stop:
 
-    ;Load pitch index.
-    ldy stream_pitch_index,x
-    ;Load pitch address.
-    lda (base_address_pitch_envelopes),y
-    sta sound_local_word_0
-    iny
-    lda (base_address_pitch_envelopes),y
-    sta sound_local_word_0+1
     ;Load pitch offset.
     ldy stream_pitch_offset,x
 
@@ -847,18 +770,18 @@ pitch_stop:
 
 .proc noise_play_note
 
-    .ifdef FEATURE_ARPEGGIOS
-    ;Load arpeggio index.
-    ldy stream_arpeggio_index,x
-    ;Load arpeggio address.
-    lda (base_address_arpeggio_envelopes),y
+    ;Load instrument index.
+    ldy stream_instrument_index,x
+    ;Load instrument address.
+    lda (base_address_instruments),y
     sta sound_local_word_0
     iny
-    lda (base_address_arpeggio_envelopes),y
+    lda (base_address_instruments),y
     sta sound_local_word_0+1
 
+    .ifdef FEATURE_ARPEGGIOS
     ;Get arpeggio type.
-    ldy #0
+    ldy #instrument_header::arpeggio_type
     lda (sound_local_word_0),y
     tay
 
@@ -898,14 +821,6 @@ pitch_stop:
     sta stream_channel_register_3,x
 pitch_already_loaded:
 
-    ;Load volume index.
-    ldy stream_volume_index,x
-    ;Load volume address.
-    lda (base_address_volume_envelopes),y
-    sta sound_local_word_0
-    iny
-    lda (base_address_volume_envelopes),y
-    sta sound_local_word_0+1
     ;Load volume offset.
     ldy stream_volume_offset,x
 
@@ -932,14 +847,6 @@ skip_volume_loop:
     inc stream_volume_offset,x
 volume_stop:
 
-    ;Load pitch index.
-    ldy stream_pitch_index,x
-    ;Load pitch address.
-    lda (base_address_pitch_envelopes),y
-    sta sound_local_word_0
-    iny
-    lda (base_address_pitch_envelopes),y
-    sta sound_local_word_0+1
     ;Load pitch offset.
     ldy stream_pitch_offset,x
 
@@ -978,14 +885,6 @@ skip_pitch_loop:
 pitch_stop:
 
 duty_code:
-    ;Load duty index.
-    ldy stream_duty_index,x
-    ;Load duty address.
-    lda (base_address_duty_envelopes),y
-    sta sound_local_word_0
-    iny
-    lda (base_address_duty_envelopes),y
-    sta sound_local_word_0+1
     ;Load duty offset.
     ldy stream_duty_offset,x
 
@@ -1267,7 +1166,7 @@ done:
 ;until exhausted.
 ;****************************************************************
 
-.proc stream_set_volume_envelope
+.proc stream_set_instrument
 
     advance_stream_read_address
     ;Load byte at read address.
@@ -1278,69 +1177,29 @@ done:
     ldy #0
     lda (sound_local_word_0),y
     asl
-    sta stream_volume_index,x
-    lda #0
+    sta stream_instrument_index,x
+    tay
+
+    lda (base_address_instruments),y
+    sta sound_local_word_0
+    iny
+    lda (base_address_instruments),y
+    sta sound_local_word_0+1
+
+    ldy #0
+    lda (sound_local_word_0),y
     sta stream_volume_offset,x
-
-    rts
-.endproc
-
-.ifdef FEATURE_ARPEGGIOS
-
-.proc stream_set_arpeggio_envelope
-
-    advance_stream_read_address
-    ;Load byte at read address.
-    lda stream_read_address_lo,x
-    sta sound_local_word_0
-    lda stream_read_address_hi,x
-    sta sound_local_word_0+1
-    ldy #0
+    iny
     lda (sound_local_word_0),y
-    asl
-    sta stream_arpeggio_index,x
-    ;Set arpeggio offset to 1 because index 0 contains arpeggio type.
-    lda #1
-    sta stream_arpeggio_offset,x
-
-    rts
-
-.endproc
-
-.endif
-
-.proc stream_set_pitch_envelope
-
-    advance_stream_read_address
-    ;Load byte at read address.
-    lda stream_read_address_lo,x
-    sta sound_local_word_0
-    lda stream_read_address_hi,x
-    sta sound_local_word_0+1
-    ldy #0
-    lda (sound_local_word_0),y
-    asl
-    sta stream_pitch_index,x
-    lda #0
     sta stream_pitch_offset,x
-
-    rts
-.endproc
-
-.proc stream_set_duty_envelope
-
-    advance_stream_read_address
-    ;Load byte at read address.
-    lda stream_read_address_lo,x
-    sta sound_local_word_0
-    lda stream_read_address_hi,x
-    sta sound_local_word_0+1
-    ldy #0
+    iny
     lda (sound_local_word_0),y
-    asl
-    sta stream_duty_index,x
-    lda #0
     sta stream_duty_offset,x
+    .ifdef FEATURE_ARPEGGIOS
+    iny
+    lda (sound_local_word_0),y
+    sta stream_arpeggio_offset,x
+    .endif
 
     rts
 .endproc
@@ -2039,18 +1898,13 @@ starting_read_address = sound_param_word_0
     sta stream_note_length_hi,x
     sta stream_note_length_counter_hi,x
 
-    ;Set initial envelope indices.
+    ;Set initial instrument index.
     lda #0
-    sta stream_volume_index,x
-    sta stream_pitch_index,x
-    sta stream_duty_index,x
+    sta stream_instrument_index,x
     sta stream_volume_offset,x
     sta stream_pitch_offset,x
     sta stream_duty_offset,x
     .ifdef FEATURE_ARPEGGIOS
-    sta stream_arpeggio_index,x
-    ;Set arpeggio offset to 1 because index 0 contains arpeggio type.
-    lda #1
     sta stream_arpeggio_offset,x
     .endif
 
@@ -2211,14 +2065,24 @@ process_note:
     lda stream_note_length_hi,x
     sta stream_note_length_counter_hi,x
 
-    ;Reset volume, pitch, and duty offsets.
-    lda #0
+    ldy stream_instrument_index,x
+    lda (base_address_instruments),y
+    sta sound_local_word_0
+    iny
+    lda (base_address_instruments),y
+    sta sound_local_word_0+1
+    ldy #0
+    lda (sound_local_word_0),y
     sta stream_volume_offset,x
+    iny
+    lda (sound_local_word_0),y
     sta stream_pitch_offset,x
+    iny
+    lda (sound_local_word_0),y
     sta stream_duty_offset,x
     .ifdef FEATURE_ARPEGGIOS
-    ;Set arpeggio offset to 1 because index 0 contains arpeggio type.
-    lda #1
+    iny
+    lda (sound_local_word_0),y
     sta stream_arpeggio_offset,x
     .endif
 

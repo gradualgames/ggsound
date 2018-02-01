@@ -20,12 +20,7 @@ FEATURE_ARPEGGIOS = 1
 .globalzp sound_param_word_1
 .globalzp sound_param_word_2
 .globalzp sound_param_word_3
-.globalzp base_address_volume_envelopes
-.ifdef FEATURE_ARPEGGIOS
-.globalzp base_address_arpeggio_envelopes
-.endif
-.globalzp base_address_pitch_envelopes
-.globalzp base_address_duty_envelopes
+.globalzp base_address_instruments
 .globalzp base_address_note_table_lo
 .globalzp base_address_note_table_hi
 .ifdef FEATURE_DPCM
@@ -34,6 +29,7 @@ FEATURE_ARPEGGIOS = 1
 .globalzp base_address_dpcm_note_to_sample_length
 .globalzp base_address_dpcm_note_to_loop_pitch_index
 .endif
+.globalzp stream_byte
 .globalzp song_address
 
 .global sound_initialize
@@ -203,31 +199,20 @@ SLL = 16+OPCODES_BASE
 ;set length hi byte
 SLH = 17+OPCODES_BASE
 
-;set volume envelope
-STV = 18+OPCODES_BASE
-
-;set pitch envelope
-STP = 19+OPCODES_BASE
-
-;set duty envelope
-SDU = 20+OPCODES_BASE
+;set instrument
+STI = 18+OPCODES_BASE
 
 ;goto
-GOT = 21+OPCODES_BASE
+GOT = 19+OPCODES_BASE
 
 ;call
-CAL = 22+OPCODES_BASE
+CAL = 20+OPCODES_BASE
 
 ;return
-RET = 23+OPCODES_BASE
+RET = 21+OPCODES_BASE
 
 ;terminate
-TRM = 24+OPCODES_BASE
-
-.ifdef FEATURE_ARPEGGIOS
-;set arpeggio envelope
-SAR = 25+OPCODES_BASE
-.endif
+TRM = 22+OPCODES_BASE
 
 ;opcodes read from volume and pitch envelopes. These values are also
 ;reserved by Famitracker, so they are safe to use.
@@ -283,6 +268,14 @@ SOUND_REGION_DENDY = 2
     .ifdef FEATURE_DPCM
     dpcm_stream_address .word
     .endif
+.endstruct
+
+.struct instrument_header
+    volume_offset .byte
+    pitch_offset .byte
+    duty_offset .byte
+    arpeggio_offset .byte
+    arpeggio_type .byte
 .endstruct
 
 .macro advance_stream_read_address

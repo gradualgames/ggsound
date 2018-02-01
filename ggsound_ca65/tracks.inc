@@ -3,7 +3,7 @@ TRACKS_INC = 1
 
 .global song_list
 .global sfx_list
-.global envelopes_list
+.global instrument_list
 .global dpcm_list
 
 MAX_TRACKS = 7
