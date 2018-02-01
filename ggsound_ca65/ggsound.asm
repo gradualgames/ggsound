@@ -959,12 +959,12 @@ duty_stop:
     ;Upload the dpcm data if sfx commands are not overriding.
     lda apu_dpcm_state
     cmp #DPCM_STATE_WAIT
-    beq :+
+    beq skip
     cmp #DPCM_STATE_UPLOAD_THEN_WAIT
-    beq :+
+    beq skip
     lda #DPCM_STATE_UPLOAD
     sta apu_dpcm_state
-:
+skip:
 
     lda stream_flags,x
     ora #STREAM_SILENCE_SET
@@ -1123,9 +1123,9 @@ arpeggio_play:
     lda (sound_local_word_0),y
     adc stream_note,x
     cmp #HIGHEST_NOTE
-    bmi :+
+    bmi skip
     lda #HIGHEST_NOTE
-    :
+skip:
     sta stream_note,x
     tay
     ;Advance arpeggio offset.
@@ -1666,9 +1666,9 @@ no_square_1:
 
     lda sfx_stream
     cmp #(soundeffect_two + 1)
-    bne :+
+    bne skip0
     jmp no_more_sfx_streams_available
-:
+skip0:
 
     ;Load square 2 stream.
     ldy #track_header::square2_stream_address
@@ -1705,9 +1705,9 @@ no_square_2:
 
     lda sfx_stream
     cmp #(soundeffect_two + 1)
-    bne :+
+    bne skip1
     jmp no_more_sfx_streams_available
-:
+skip1:
 
     ;Load triangle stream.
     ldy #track_header::triangle_stream_address
@@ -1969,9 +1969,9 @@ read_address = sound_local_word_1
 
     lda stream_flags,x
     and #STREAM_PAUSE_TEST
-    beq :+
+    beq skip0
     rts
-:
+skip0:
 
     ;Load current read address of stream.
     lda stream_read_address_lo,x
@@ -1982,11 +1982,11 @@ read_address = sound_local_word_1
     ;Load next byte from stream data.
     lda stream_flags,x
     and #STREAM_PITCH_LOADED_TEST
-    bne :+
+    bne skip1
     ldy #0
     lda (read_address),y
     sta stream_note,x
-    :
+skip1:
 
     ;Is this byte a note or a stream opcode?
     cmp #OPCODES_BASE
@@ -2294,10 +2294,10 @@ dpcm_upload_then_wait:
 dpcm_wait:
     lda $4015
     and #%00010000
-    bne :+
+    bne skip
     lda #DPCM_STATE_NOP
     sta apu_dpcm_state
-:
+skip:
     rts
 dpcm_nop:
     rts
