@@ -2303,10 +2303,16 @@ dpcm_nop:
     rts
 
 dpcm_state_callback_lo:
-    .lobytes (dpcm_nop-1), (dpcm_upload-1), (dpcm_upload_then_wait-1), (dpcm_wait-1)
+    .byte <(dpcm_nop-1)
+    .byte <(dpcm_upload-1)
+    .byte <(dpcm_upload_then_wait-1)
+    .byte <(dpcm_wait-1)
 
 dpcm_state_callback_hi:
-    .hibytes (dpcm_nop-1), (dpcm_upload-1), (dpcm_upload_then_wait-1), (dpcm_wait-1)
+    .byte >(dpcm_nop-1)
+    .byte >(dpcm_upload-1)
+    .byte >(dpcm_upload_then_wait-1)
+    .byte >(dpcm_wait-1)
 
 dpcm_upload_registers:
     lda apu_register_sets+16
