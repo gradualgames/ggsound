@@ -318,85 +318,120 @@ sfx_stream_not_active:
 .endproc
 
 ;Note table borrowed from periods.s provided by FamiTracker's NSF driver.
-.define ntsc_note_table \
-    $0D5B, $0C9C, $0BE6, $0B3B, $0A9A, $0A01, $0972, $08EA, $086A, $07F1, $077F, $0713,\
-    $06AD, $064D, $05F3, $059D, $054C, $0500, $04B8, $0474, $0434, $03F8, $03BF, $0389,\
-    $0356, $0326, $02F9, $02CE, $02A6, $0280, $025C, $023A, $021A, $01FB, $01DF, $01C4,\
-    $01AB, $0193, $017C, $0167, $0152, $013F, $012D, $011C, $010C, $00FD, $00EF, $00E1,\
-    $00D5, $00C9, $00BD, $00B3, $00A9, $009F, $0096, $008E, $0086, $007E, $0077, $0070,\
-    $006A, $0064, $005E, $0059, $0054, $004F, $004B, $0046, $0042, $003F, $003B, $0038,\
-    $0034, $0031, $002F, $002C, $0029, $0027, $0025, $0023, $0021, $001F, $001D, $001B,\
-    $001A, $0018, $0017, $0015, $0014, $0013, $0012, $0011, $0010, $000F, $000E, $000D
+ntsc_note_table_lo:
+    .byte <$0D5B, <$0C9C, <$0BE6, <$0B3B, <$0A9A, <$0A01, <$0972, <$08EA, <$086A, <$07F1, <$077F, <$0713
+    .byte <$06AD, <$064D, <$05F3, <$059D, <$054C, <$0500, <$04B8, <$0474, <$0434, <$03F8, <$03BF, <$0389
+    .byte <$0356, <$0326, <$02F9, <$02CE, <$02A6, <$0280, <$025C, <$023A, <$021A, <$01FB, <$01DF, <$01C4
+    .byte <$01AB, <$0193, <$017C, <$0167, <$0152, <$013F, <$012D, <$011C, <$010C, <$00FD, <$00EF, <$00E1
+    .byte <$00D5, <$00C9, <$00BD, <$00B3, <$00A9, <$009F, <$0096, <$008E, <$0086, <$007E, <$0077, <$0070
+    .byte <$006A, <$0064, <$005E, <$0059, <$0054, <$004F, <$004B, <$0046, <$0042, <$003F, <$003B, <$0038
+    .byte <$0034, <$0031, <$002F, <$002C, <$0029, <$0027, <$0025, <$0023, <$0021, <$001F, <$001D, <$001B
+    .byte <$001A, <$0018, <$0017, <$0015, <$0014, <$0013, <$0012, <$0011, <$0010, <$000F, <$000E, <$000D
 
-.define pal_note_table \
-    $0C68, $0BB6, $0B0E, $0A6F, $09D9, $094B, $08C6, $0848, $07D1, $0760, $06F6, $0692,\
-    $0634, $05DB, $0586, $0537, $04EC, $04A5, $0462, $0423, $03E8, $03B0, $037B, $0349,\
-    $0319, $02ED, $02C3, $029B, $0275, $0252, $0231, $0211, $01F3, $01D7, $01BD, $01A4,\
-    $018C, $0176, $0161, $014D, $013A, $0129, $0118, $0108, $00F9, $00EB, $00DE, $00D1,\
-    $00C6, $00BA, $00B0, $00A6, $009D, $0094, $008B, $0084, $007C, $0075, $006E, $0068,\
-    $0062, $005D, $0057, $0052, $004E, $0049, $0045, $0041, $003E, $003A, $0037, $0034,\
-    $0031, $002E, $002B, $0029, $0026, $0024, $0022, $0020, $001E, $001D, $001B, $0019,\
-    $0018, $0016, $0015, $0014, $0013, $0012, $0011, $0010, $000F, $000E, $000D, $000C
+ntsc_note_table_hi:
+    .byte >$0D5B, >$0C9C, >$0BE6, >$0B3B, >$0A9A, >$0A01, >$0972, >$08EA, >$086A, >$07F1, >$077F, >$0713
+    .byte >$06AD, >$064D, >$05F3, >$059D, >$054C, >$0500, >$04B8, >$0474, >$0434, >$03F8, >$03BF, >$0389
+    .byte >$0356, >$0326, >$02F9, >$02CE, >$02A6, >$0280, >$025C, >$023A, >$021A, >$01FB, >$01DF, >$01C4
+    .byte >$01AB, >$0193, >$017C, >$0167, >$0152, >$013F, >$012D, >$011C, >$010C, >$00FD, >$00EF, >$00E1
+    .byte >$00D5, >$00C9, >$00BD, >$00B3, >$00A9, >$009F, >$0096, >$008E, >$0086, >$007E, >$0077, >$0070
+    .byte >$006A, >$0064, >$005E, >$0059, >$0054, >$004F, >$004B, >$0046, >$0042, >$003F, >$003B, >$0038
+    .byte >$0034, >$0031, >$002F, >$002C, >$0029, >$0027, >$0025, >$0023, >$0021, >$001F, >$001D, >$001B
+    .byte >$001A, >$0018, >$0017, >$0015, >$0014, >$0013, >$0012, >$0011, >$0010, >$000F, >$000E, >$000D
 
-ntsc_note_table_lo: .lobytes ntsc_note_table
-ntsc_note_table_hi: .hibytes ntsc_note_table
-pal_note_table_lo:  .lobytes pal_note_table
-pal_note_table_hi:  .hibytes pal_note_table
+pal_note_table_lo:
+    .byte <$0C68, <$0BB6, <$0B0E, <$0A6F, <$09D9, <$094B, <$08C6, <$0848, <$07D1, <$0760, <$06F6, <$0692
+    .byte <$0634, <$05DB, <$0586, <$0537, <$04EC, <$04A5, <$0462, <$0423, <$03E8, <$03B0, <$037B, <$0349
+    .byte <$0319, <$02ED, <$02C3, <$029B, <$0275, <$0252, <$0231, <$0211, <$01F3, <$01D7, <$01BD, <$01A4
+    .byte <$018C, <$0176, <$0161, <$014D, <$013A, <$0129, <$0118, <$0108, <$00F9, <$00EB, <$00DE, <$00D1
+    .byte <$00C6, <$00BA, <$00B0, <$00A6, <$009D, <$0094, <$008B, <$0084, <$007C, <$0075, <$006E, <$0068
+    .byte <$0062, <$005D, <$0057, <$0052, <$004E, <$0049, <$0045, <$0041, <$003E, <$003A, <$0037, <$0034
+    .byte <$0031, <$002E, <$002B, <$0029, <$0026, <$0024, <$0022, <$0020, <$001E, <$001D, <$001B, <$0019
+    .byte <$0018, <$0016, <$0015, <$0014, <$0013, <$0012, <$0011, <$0010, <$000F, <$000E, <$000D, <$000C
+
+pal_note_table_hi:
+    .byte >$0C68, >$0BB6, >$0B0E, >$0A6F, >$09D9, >$094B, >$08C6, >$0848, >$07D1, >$0760, >$06F6, >$0692
+    .byte >$0634, >$05DB, >$0586, >$0537, >$04EC, >$04A5, >$0462, >$0423, >$03E8, >$03B0, >$037B, >$0349
+    .byte >$0319, >$02ED, >$02C3, >$029B, >$0275, >$0252, >$0231, >$0211, >$01F3, >$01D7, >$01BD, >$01A4
+    .byte >$018C, >$0176, >$0161, >$014D, >$013A, >$0129, >$0118, >$0108, >$00F9, >$00EB, >$00DE, >$00D1
+    .byte >$00C6, >$00BA, >$00B0, >$00A6, >$009D, >$0094, >$008B, >$0084, >$007C, >$0075, >$006E, >$0068
+    .byte >$0062, >$005D, >$0057, >$0052, >$004E, >$0049, >$0045, >$0041, >$003E, >$003A, >$0037, >$0034
+    .byte >$0031, >$002E, >$002B, >$0029, >$0026, >$0024, >$0022, >$0020, >$001E, >$001D, >$001B, >$0019
+    .byte >$0018, >$0016, >$0015, >$0014, >$0013, >$0012, >$0011, >$0010, >$000F, >$000E, >$000D, >$000C
 
 ;Maps NTSC to NTSC tempo, maps PAL and Dendy to
 ;faster PAL tempo in song and sfx headers.
 sound_region_to_tempo_offset:
     .byte 0, 2, 2
 
-.ifdef FEATURE_DPCM
+channel_callback_table_lo:
+    .byte <square_1_play_note
+    .byte <square_2_play_note
+    .byte <triangle_play_note
+    .byte <noise_play_note
+    .ifdef FEATURE_DPCM
+    .byte <dpcm_play_note
+    .endif
 
-.define channel_callback_table \
-    square_1_play_note, \
-    square_2_play_note, \
-    triangle_play_note, \
-    noise_play_note, \
-    dpcm_play_note
+channel_callback_table_hi:
+    .byte >square_1_play_note
+    .byte >square_2_play_note
+    .byte >triangle_play_note
+    .byte >noise_play_note
+    .ifdef FEATURE_DPCM
+    .byte >dpcm_play_note
+    .endif
 
-.else
+stream_callback_table_lo:
+    .byte <stream_set_length_s
+    .byte <stream_set_length_s
+    .byte <stream_set_length_s
+    .byte <stream_set_length_s
+    .byte <stream_set_length_s
+    .byte <stream_set_length_s
+    .byte <stream_set_length_s
+    .byte <stream_set_length_s
+    .byte <stream_set_length_s
+    .byte <stream_set_length_s
+    .byte <stream_set_length_s
+    .byte <stream_set_length_s
+    .byte <stream_set_length_s
+    .byte <stream_set_length_s
+    .byte <stream_set_length_s
+    .byte <stream_set_length_s
+    .byte <stream_set_length_lo
+    .byte <stream_set_length_hi
+    .byte <stream_set_instrument
+    .byte <stream_goto
+    .byte <stream_call
+    .byte <stream_return
+    .byte <stream_terminate
 
-.define channel_callback_table \
-    square_1_play_note, \
-    square_2_play_note, \
-    triangle_play_note, \
-    noise_play_note
-
-.endif
-
-
-channel_callback_table_lo: .lobytes channel_callback_table
-channel_callback_table_hi: .hibytes channel_callback_table
+stream_callback_table_hi:
+    .byte >stream_set_length_s
+    .byte >stream_set_length_s
+    .byte >stream_set_length_s
+    .byte >stream_set_length_s
+    .byte >stream_set_length_s
+    .byte >stream_set_length_s
+    .byte >stream_set_length_s
+    .byte >stream_set_length_s
+    .byte >stream_set_length_s
+    .byte >stream_set_length_s
+    .byte >stream_set_length_s
+    .byte >stream_set_length_s
+    .byte >stream_set_length_s
+    .byte >stream_set_length_s
+    .byte >stream_set_length_s
+    .byte >stream_set_length_s
+    .byte >stream_set_length_lo
+    .byte >stream_set_length_hi
+    .byte >stream_set_instrument
+    .byte >stream_goto
+    .byte >stream_call
+    .byte >stream_return
+    .byte >stream_terminate
 
 .ifdef FEATURE_ARPEGGIOS
-
-.define stream_callback_table \
-    stream_set_length_s, \
-    stream_set_length_s, \
-    stream_set_length_s, \
-    stream_set_length_s, \
-    stream_set_length_s, \
-    stream_set_length_s, \
-    stream_set_length_s, \
-    stream_set_length_s, \
-    stream_set_length_s, \
-    stream_set_length_s, \
-    stream_set_length_s, \
-    stream_set_length_s, \
-    stream_set_length_s, \
-    stream_set_length_s, \
-    stream_set_length_s, \
-    stream_set_length_s, \
-    stream_set_length_lo, \
-    stream_set_length_hi, \
-    stream_set_instrument, \
-    stream_goto, \
-    stream_call, \
-    stream_return, \
-    stream_terminate
 
 arpeggio_callback_table_lo:
     .byte <(arpeggio_absolute-1)
@@ -408,37 +443,7 @@ arpeggio_callback_table_hi:
     .byte >(arpeggio_fixed-1)
     .byte >(arpeggio_relative-1)
 
-.else
-
-.define stream_callback_table \
-    stream_set_length_s, \
-    stream_set_length_s, \
-    stream_set_length_s, \
-    stream_set_length_s, \
-    stream_set_length_s, \
-    stream_set_length_s, \
-    stream_set_length_s, \
-    stream_set_length_s, \
-    stream_set_length_s, \
-    stream_set_length_s, \
-    stream_set_length_s, \
-    stream_set_length_s, \
-    stream_set_length_s, \
-    stream_set_length_s, \
-    stream_set_length_s, \
-    stream_set_length_s, \
-    stream_set_length_lo, \
-    stream_set_length_hi, \
-    stream_set_instrument, \
-    stream_goto, \
-    stream_call, \
-    stream_return, \
-    stream_terminate
-
 .endif
-
-stream_callback_table_lo: .lobytes stream_callback_table
-stream_callback_table_hi: .hibytes stream_callback_table
 
 ;****************************************************************
 ;These callbacks are all note playback and only execute once per
