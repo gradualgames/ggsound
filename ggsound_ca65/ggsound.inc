@@ -256,27 +256,23 @@ SOUND_REGION_NTSC = 0
 SOUND_REGION_PAL  = 1
 SOUND_REGION_DENDY = 2
 
-.struct track_header
-    ntsc_tempo_lo .byte
-    ntsc_tempo_hi .byte
-    pal_tempo_lo .byte
-    pal_tempo_hi .byte
-    square1_stream_address .word
-    square2_stream_address .word
-    triangle_stream_address .word
-    noise_stream_address .word
-    .ifdef FEATURE_DPCM
-    dpcm_stream_address .word
-    .endif
-.endstruct
+track_header_ntsc_tempo_lo = 0
+track_header_ntsc_tempo_hi = 1
+track_header_pal_tempo_lo  = 2
+track_header_pal_tempo_hi  = 3
+track_header_square1_stream_address = 4
+track_header_square2_stream_address = 6
+track_header_triangle_stream_address = 8
+track_header_noise_stream_address = 10
+.ifdef FEATURE_DPCM
+track_header_dpcm_stream_address = 12
+.endif
 
-.struct instrument_header
-    volume_offset .byte
-    pitch_offset .byte
-    duty_offset .byte
-    arpeggio_offset .byte
-    arpeggio_type .byte
-.endstruct
+instrument_header_volume_offset = 0
+instrument_header_pitch_offset = 1
+instrument_header_duty_offset = 2
+instrument_header_arpeggio_offset = 3
+instrument_header_arpeggio_type = 4
 
 .macro advance_stream_read_address
 

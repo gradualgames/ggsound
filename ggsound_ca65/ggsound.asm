@@ -468,7 +468,7 @@ arpeggio_callback_table_hi:
     .ifdef FEATURE_ARPEGGIOS
 
     ;Get arpeggio type.
-    ldy #instrument_header::arpeggio_type
+    ldy #instrument_header_arpeggio_type
     lda (sound_local_word_0),y
     tay
 
@@ -654,7 +654,7 @@ square_2_play_note = square_1_play_note
 
     .ifdef FEATURE_ARPEGGIOS
     ;Get arpeggio type.
-    ldy #instrument_header::arpeggio_type
+    ldy #instrument_header_arpeggio_type
     lda (sound_local_word_0),y
     tay
 
@@ -786,7 +786,7 @@ pitch_stop:
 
     .ifdef FEATURE_ARPEGGIOS
     ;Get arpeggio type.
-    ldy #instrument_header::arpeggio_type
+    ldy #instrument_header_arpeggio_type
     lda (sound_local_word_0),y
     tay
 
@@ -1413,7 +1413,7 @@ not_sound_effect:
     ldx #0
     jsr stream_stop
 
-    ldy #track_header::square1_stream_address
+    ldy #track_header_square1_stream_address
     lda (song_address),y
     sta sound_param_word_0
     iny
@@ -1430,7 +1430,7 @@ not_sound_effect:
     jsr stream_initialize
 
     clc
-    lda #track_header::ntsc_tempo_lo
+    lda #track_header_ntsc_tempo_lo
     adc tempo_offset
     tay
     lda (song_address),y
@@ -1447,7 +1447,7 @@ no_square_1:
     ldx #1
     jsr stream_stop
 
-    ldy #track_header::square2_stream_address
+    ldy #track_header_square2_stream_address
     lda (song_address),y
     sta sound_param_word_0
     iny
@@ -1464,7 +1464,7 @@ no_square_1:
     jsr stream_initialize
 
     clc
-    lda #track_header::ntsc_tempo_lo
+    lda #track_header_ntsc_tempo_lo
     adc tempo_offset
     tay
     lda (song_address),y
@@ -1481,7 +1481,7 @@ no_square_2:
     ldx #2
     jsr stream_stop
 
-    ldy #track_header::triangle_stream_address
+    ldy #track_header_triangle_stream_address
     lda (song_address),y
     sta sound_param_word_0
     iny
@@ -1498,7 +1498,7 @@ no_square_2:
     jsr stream_initialize
 
     clc
-    lda #track_header::ntsc_tempo_lo
+    lda #track_header_ntsc_tempo_lo
     adc tempo_offset
     tay
     lda (song_address),y
@@ -1515,7 +1515,7 @@ no_triangle:
     ldx #3
     jsr stream_stop
 
-    ldy #track_header::noise_stream_address
+    ldy #track_header_noise_stream_address
     lda (song_address),y
     sta sound_param_word_0
     iny
@@ -1532,7 +1532,7 @@ no_triangle:
     jsr stream_initialize
 
     clc
-    lda #track_header::ntsc_tempo_lo
+    lda #track_header_ntsc_tempo_lo
     adc tempo_offset
     tay
     lda (song_address),y
@@ -1550,7 +1550,7 @@ no_noise:
     ldx #4
     jsr stream_stop
 
-    ldy #track_header::dpcm_stream_address
+    ldy #track_header_dpcm_stream_address
     lda (song_address),y
     sta sound_param_word_0
     iny
@@ -1570,7 +1570,7 @@ no_noise:
     sta apu_dpcm_state
 
     clc
-    lda #track_header::ntsc_tempo_lo
+    lda #track_header_ntsc_tempo_lo
     adc tempo_offset
     tay
     lda (song_address),y
@@ -1632,7 +1632,7 @@ no_dpcm:
     sta sfx_stream
 
     ;Load square 1 stream.
-    ldy #track_header::square1_stream_address
+    ldy #track_header_square1_stream_address
     lda (sfx_address),y
     sta sound_param_word_0
     iny
@@ -1650,7 +1650,7 @@ no_dpcm:
 
     ldx sfx_stream
     clc
-    lda #track_header::ntsc_tempo_lo
+    lda #track_header_ntsc_tempo_lo
     adc tempo_offset
     tay
     lda (sfx_address),y
@@ -1671,7 +1671,7 @@ no_square_1:
 skip0:
 
     ;Load square 2 stream.
-    ldy #track_header::square2_stream_address
+    ldy #track_header_square2_stream_address
     lda (sfx_address),y
     sta sound_param_word_0
     iny
@@ -1689,7 +1689,7 @@ skip0:
 
     ldx sfx_stream
     clc
-    lda #track_header::ntsc_tempo_lo
+    lda #track_header_ntsc_tempo_lo
     adc tempo_offset
     tay
     lda (sfx_address),y
@@ -1710,7 +1710,7 @@ no_square_2:
 skip1:
 
     ;Load triangle stream.
-    ldy #track_header::triangle_stream_address
+    ldy #track_header_triangle_stream_address
     lda (sfx_address),y
     sta sound_param_word_0
     iny
@@ -1728,7 +1728,7 @@ skip1:
 
     ldx sfx_stream
     clc
-    lda #track_header::ntsc_tempo_lo
+    lda #track_header_ntsc_tempo_lo
     adc tempo_offset
     tay
     lda (sfx_address),y
@@ -1747,7 +1747,7 @@ no_triangle:
     beq no_more_sfx_streams_available
 
     ;Load noise stream.
-    ldy #track_header::noise_stream_address
+    ldy #track_header_noise_stream_address
     lda (sfx_address),y
     sta sound_param_word_0
     iny
@@ -1765,7 +1765,7 @@ no_triangle:
 
     ldx sfx_stream
     clc
-    lda #track_header::ntsc_tempo_lo
+    lda #track_header_ntsc_tempo_lo
     adc tempo_offset
     tay
     lda (sfx_address),y
@@ -1781,7 +1781,7 @@ no_noise:
 
     .ifdef FEATURE_DPCM
     ;Load dpcm stream.
-    ldy #track_header::dpcm_stream_address
+    ldy #track_header_dpcm_stream_address
     lda (sfx_address),y
     sta sound_param_word_0
     iny
@@ -1799,7 +1799,7 @@ no_noise:
 
     ldx sfx_stream
     clc
-    lda #track_header::ntsc_tempo_lo
+    lda #track_header_ntsc_tempo_lo
     adc tempo_offset
     tay
     lda (sfx_address),y
