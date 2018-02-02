@@ -17,12 +17,7 @@ sound_param_word_1: .dsb 2
 sound_param_word_2: .dsb 2
 sound_param_word_3: .dsb 2
 
-base_address_volume_envelopes: .dsb 2
-ifdef FEATURE_ARPEGGIOS
-base_address_arpeggio_envelopes: .dsb 2
-endif
-base_address_pitch_envelopes:  .dsb 2
-base_address_duty_envelopes:   .dsb 2
+base_address_instruments: .dsb 2
 base_address_note_table_lo: .dsb 2
 base_address_note_table_hi: .dsb 2
 ifdef FEATURE_DPCM

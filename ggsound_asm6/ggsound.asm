@@ -1,7 +1,7 @@
 ;Expects sound_param_byte_0 to contain desired region (SOUND_REGION_NTSC, SOUND_REGION_PAL, SOUND_REGION_DENDY)
 ;Expects sound_param_word_0 to contain song list address.
 ;Expects sound_param_word_1 to contain sfx list address.
-;Expects sound_param_word_2 to contain envelopes list address.
+;Expects sound_param_word_2 to contain instrument list address.
 ;If FEATURE_DPCM is defined, then
 ;Expects sound_param_word_3 to contain dpcm sample address.
 sound_initialize:
@@ -12,49 +12,23 @@ sound_initialize:
     lda sound_param_byte_0
     sta sound_region
 
+    ;Get songs address.
     lda sound_param_word_0
     sta song_list_address
     lda sound_param_word_0+1
     sta song_list_address+1
 
+    ;Get sfx address.
     lda sound_param_word_1
     sta sfx_list_address
     lda sound_param_word_1+1
     sta sfx_list_address+1
 
-    ;Get volume envelopes address.
-    ldy #0
-    lda (sound_param_word_2),y
-    sta base_address_volume_envelopes
-    iny
-    lda (sound_param_word_2),y
-    sta base_address_volume_envelopes+1
-
-    ifdef FEATURE_ARPEGGIOS
-    ;Get arpeggio envelopes address.
-    iny
-    lda (sound_param_word_2),y
-    sta base_address_arpeggio_envelopes
-    iny
-    lda (sound_param_word_2),y
-    sta base_address_arpeggio_envelopes+1
-    endif
-
-    ;Get pitch envelopes address.
-    iny
-    lda (sound_param_word_2),y
-    sta base_address_pitch_envelopes
-    iny
-    lda (sound_param_word_2),y
-    sta base_address_pitch_envelopes+1
-
-    ;Get duty envelopes address.
-    iny
-    lda (sound_param_word_2),y
-    sta base_address_duty_envelopes
-    iny
-    lda (sound_param_word_2),y
-    sta base_address_duty_envelopes+1
+    ;Get instruments address.
+    lda sound_param_word_2
+    sta base_address_instruments
+    lda sound_param_word_2+1
+    sta base_address_instruments+1
 
     ifdef FEATURE_DPCM
     ;Get dpcm samples list.
@@ -92,23 +66,23 @@ sound_initialize:
     cmp #SOUND_REGION_PAL
     beq @pal
 @nstc:
-    lda #<(ntsc_note_table_lo)
+    lda #<ntsc_note_table_lo
     sta base_address_note_table_lo
-    lda #>(ntsc_note_table_lo)
+    lda #>ntsc_note_table_lo
     sta base_address_note_table_lo+1
-    lda #<(ntsc_note_table_hi)
+    lda #<ntsc_note_table_hi
     sta base_address_note_table_hi
-    lda #>(ntsc_note_table_hi)
+    lda #>ntsc_note_table_hi
     sta base_address_note_table_hi+1
     jmp @done
 @pal:
-    lda #<(pal_note_table_lo)
+    lda #<pal_note_table_lo
     sta base_address_note_table_lo
-    lda #>(pal_note_table_lo)
+    lda #>pal_note_table_lo
     sta base_address_note_table_lo+1
-    lda #<(pal_note_table_hi)
+    lda #<pal_note_table_hi
     sta base_address_note_table_hi
-    lda #>(pal_note_table_hi)
+    lda #>pal_note_table_hi
     sta base_address_note_table_hi+1
 @done:
 
@@ -116,6 +90,7 @@ sound_initialize:
     lda #%00001111
     sta $4015
 
+    ;Ensure no apu data is uploaded yet.
     lda #0
     sta apu_data_ready
     ifdef FEATURE_DPCM
@@ -132,6 +107,7 @@ sound_initialize:
 
     rts
 
+
 ;Kill all active streams and halt sound.
 sound_stop:
 
@@ -143,12 +119,13 @@ sound_stop:
 
     ;Kill all streams.
     ldx #(MAX_STREAMS-1)
--
+@loop:
+
     lda #0
     sta stream_flags,x
 
     dex
-    bpl -
+    bpl @loop
 
     jsr sound_initialize_apu_buffer
 
@@ -194,8 +171,8 @@ sound_update:
     ;Load channel number.
     lda stream_channel,x
     ;Multiply by four to get location within apu_register_sets.
-    asl
-    asl
+    asl a
+    asl a
     tay
     ;Copy the registers over.
     lda stream_channel_register_1,x
@@ -211,7 +188,7 @@ sound_update:
     inx
     cpx #MAX_MUSIC_STREAMS
     bne @song_stream_register_copy_loop
-do_not_update_music:
+@do_not_update_music:
 
     ldx #soundeffect_one
 @sfx_stream_register_copy_loop:
@@ -227,8 +204,8 @@ do_not_update_music:
     ;Load channel number
     lda stream_channel,x
     ;Multiply by four to get location within apu_register_sets.
-    asl
-    asl
+    asl a
+    asl a
     tay
     ;Copy the registers over.
     lda stream_channel_register_1,x
@@ -257,45 +234,44 @@ do_not_update_music:
 
 ;Note table borrowed from periods.s provided by FamiTracker's NSF driver.
 ntsc_note_table_lo:
-    .dl $0D5B, $0C9C, $0BE6, $0B3B, $0A9A, $0A01, $0972, $08EA, $086A, $07F1, $077F, $0713
-    .dl $06AD, $064D, $05F3, $059D, $054C, $0500, $04B8, $0474, $0434, $03F8, $03BF, $0389
-    .dl $0356, $0326, $02F9, $02CE, $02A6, $0280, $025C, $023A, $021A, $01FB, $01DF, $01C4
-    .dl $01AB, $0193, $017C, $0167, $0152, $013F, $012D, $011C, $010C, $00FD, $00EF, $00E1
-    .dl $00D5, $00C9, $00BD, $00B3, $00A9, $009F, $0096, $008E, $0086, $007E, $0077, $0070
-    .dl $006A, $0064, $005E, $0059, $0054, $004F, $004B, $0046, $0042, $003F, $003B, $0038
-    .dl $0034, $0031, $002F, $002C, $0029, $0027, $0025, $0023, $0021, $001F, $001D, $001B
-    .dl $001A, $0018, $0017, $0015, $0014, $0013, $0012, $0011, $0010, $000F, $000E, $000D
-
+    .db <$0D5B, <$0C9C, <$0BE6, <$0B3B, <$0A9A, <$0A01, <$0972, <$08EA, <$086A, <$07F1, <$077F, <$0713
+    .db <$06AD, <$064D, <$05F3, <$059D, <$054C, <$0500, <$04B8, <$0474, <$0434, <$03F8, <$03BF, <$0389
+    .db <$0356, <$0326, <$02F9, <$02CE, <$02A6, <$0280, <$025C, <$023A, <$021A, <$01FB, <$01DF, <$01C4
+    .db <$01AB, <$0193, <$017C, <$0167, <$0152, <$013F, <$012D, <$011C, <$010C, <$00FD, <$00EF, <$00E1
+    .db <$00D5, <$00C9, <$00BD, <$00B3, <$00A9, <$009F, <$0096, <$008E, <$0086, <$007E, <$0077, <$0070
+    .db <$006A, <$0064, <$005E, <$0059, <$0054, <$004F, <$004B, <$0046, <$0042, <$003F, <$003B, <$0038
+    .db <$0034, <$0031, <$002F, <$002C, <$0029, <$0027, <$0025, <$0023, <$0021, <$001F, <$001D, <$001B
+    .db <$001A, <$0018, <$0017, <$0015, <$0014, <$0013, <$0012, <$0011, <$0010, <$000F, <$000E, <$000D
 
 ntsc_note_table_hi:
-    .dh $0D5B, $0C9C, $0BE6, $0B3B, $0A9A, $0A01, $0972, $08EA, $086A, $07F1, $077F, $0713
-    .dh $06AD, $064D, $05F3, $059D, $054C, $0500, $04B8, $0474, $0434, $03F8, $03BF, $0389
-    .dh $0356, $0326, $02F9, $02CE, $02A6, $0280, $025C, $023A, $021A, $01FB, $01DF, $01C4
-    .dh $01AB, $0193, $017C, $0167, $0152, $013F, $012D, $011C, $010C, $00FD, $00EF, $00E1
-    .dh $00D5, $00C9, $00BD, $00B3, $00A9, $009F, $0096, $008E, $0086, $007E, $0077, $0070
-    .dh $006A, $0064, $005E, $0059, $0054, $004F, $004B, $0046, $0042, $003F, $003B, $0038
-    .dh $0034, $0031, $002F, $002C, $0029, $0027, $0025, $0023, $0021, $001F, $001D, $001B
-    .dh $001A, $0018, $0017, $0015, $0014, $0013, $0012, $0011, $0010, $000F, $000E, $000D
+    .db >$0D5B, >$0C9C, >$0BE6, >$0B3B, >$0A9A, >$0A01, >$0972, >$08EA, >$086A, >$07F1, >$077F, >$0713
+    .db >$06AD, >$064D, >$05F3, >$059D, >$054C, >$0500, >$04B8, >$0474, >$0434, >$03F8, >$03BF, >$0389
+    .db >$0356, >$0326, >$02F9, >$02CE, >$02A6, >$0280, >$025C, >$023A, >$021A, >$01FB, >$01DF, >$01C4
+    .db >$01AB, >$0193, >$017C, >$0167, >$0152, >$013F, >$012D, >$011C, >$010C, >$00FD, >$00EF, >$00E1
+    .db >$00D5, >$00C9, >$00BD, >$00B3, >$00A9, >$009F, >$0096, >$008E, >$0086, >$007E, >$0077, >$0070
+    .db >$006A, >$0064, >$005E, >$0059, >$0054, >$004F, >$004B, >$0046, >$0042, >$003F, >$003B, >$0038
+    .db >$0034, >$0031, >$002F, >$002C, >$0029, >$0027, >$0025, >$0023, >$0021, >$001F, >$001D, >$001B
+    .db >$001A, >$0018, >$0017, >$0015, >$0014, >$0013, >$0012, >$0011, >$0010, >$000F, >$000E, >$000D
 
 pal_note_table_lo:
-    .dl $0C68, $0BB6, $0B0E, $0A6F, $09D9, $094B, $08C6, $0848, $07D1, $0760, $06F6, $0692
-    .dl $0634, $05DB, $0586, $0537, $04EC, $04A5, $0462, $0423, $03E8, $03B0, $037B, $0349
-    .dl $0319, $02ED, $02C3, $029B, $0275, $0252, $0231, $0211, $01F3, $01D7, $01BD, $01A4
-    .dl $018C, $0176, $0161, $014D, $013A, $0129, $0118, $0108, $00F9, $00EB, $00DE, $00D1
-    .dl $00C6, $00BA, $00B0, $00A6, $009D, $0094, $008B, $0084, $007C, $0075, $006E, $0068
-    .dl $0062, $005D, $0057, $0052, $004E, $0049, $0045, $0041, $003E, $003A, $0037, $0034
-    .dl $0031, $002E, $002B, $0029, $0026, $0024, $0022, $0020, $001E, $001D, $001B, $0019
-    .dl $0018, $0016, $0015, $0014, $0013, $0012, $0011, $0010, $000F, $000E, $000D, $000C
+    .db <$0C68, <$0BB6, <$0B0E, <$0A6F, <$09D9, <$094B, <$08C6, <$0848, <$07D1, <$0760, <$06F6, <$0692
+    .db <$0634, <$05DB, <$0586, <$0537, <$04EC, <$04A5, <$0462, <$0423, <$03E8, <$03B0, <$037B, <$0349
+    .db <$0319, <$02ED, <$02C3, <$029B, <$0275, <$0252, <$0231, <$0211, <$01F3, <$01D7, <$01BD, <$01A4
+    .db <$018C, <$0176, <$0161, <$014D, <$013A, <$0129, <$0118, <$0108, <$00F9, <$00EB, <$00DE, <$00D1
+    .db <$00C6, <$00BA, <$00B0, <$00A6, <$009D, <$0094, <$008B, <$0084, <$007C, <$0075, <$006E, <$0068
+    .db <$0062, <$005D, <$0057, <$0052, <$004E, <$0049, <$0045, <$0041, <$003E, <$003A, <$0037, <$0034
+    .db <$0031, <$002E, <$002B, <$0029, <$0026, <$0024, <$0022, <$0020, <$001E, <$001D, <$001B, <$0019
+    .db <$0018, <$0016, <$0015, <$0014, <$0013, <$0012, <$0011, <$0010, <$000F, <$000E, <$000D, <$000C
 
 pal_note_table_hi:
-    .dh $0C68, $0BB6, $0B0E, $0A6F, $09D9, $094B, $08C6, $0848, $07D1, $0760, $06F6, $0692
-    .dh $0634, $05DB, $0586, $0537, $04EC, $04A5, $0462, $0423, $03E8, $03B0, $037B, $0349
-    .dh $0319, $02ED, $02C3, $029B, $0275, $0252, $0231, $0211, $01F3, $01D7, $01BD, $01A4
-    .dh $018C, $0176, $0161, $014D, $013A, $0129, $0118, $0108, $00F9, $00EB, $00DE, $00D1
-    .dh $00C6, $00BA, $00B0, $00A6, $009D, $0094, $008B, $0084, $007C, $0075, $006E, $0068
-    .dh $0062, $005D, $0057, $0052, $004E, $0049, $0045, $0041, $003E, $003A, $0037, $0034
-    .dh $0031, $002E, $002B, $0029, $0026, $0024, $0022, $0020, $001E, $001D, $001B, $0019
-    .dh $0018, $0016, $0015, $0014, $0013, $0012, $0011, $0010, $000F, $000E, $000D, $000C
+    .db >$0C68, >$0BB6, >$0B0E, >$0A6F, >$09D9, >$094B, >$08C6, >$0848, >$07D1, >$0760, >$06F6, >$0692
+    .db >$0634, >$05DB, >$0586, >$0537, >$04EC, >$04A5, >$0462, >$0423, >$03E8, >$03B0, >$037B, >$0349
+    .db >$0319, >$02ED, >$02C3, >$029B, >$0275, >$0252, >$0231, >$0211, >$01F3, >$01D7, >$01BD, >$01A4
+    .db >$018C, >$0176, >$0161, >$014D, >$013A, >$0129, >$0118, >$0108, >$00F9, >$00EB, >$00DE, >$00D1
+    .db >$00C6, >$00BA, >$00B0, >$00A6, >$009D, >$0094, >$008B, >$0084, >$007C, >$0075, >$006E, >$0068
+    .db >$0062, >$005D, >$0057, >$0052, >$004E, >$0049, >$0045, >$0041, >$003E, >$003A, >$0037, >$0034
+    .db >$0031, >$002E, >$002B, >$0029, >$0026, >$0024, >$0022, >$0020, >$001E, >$001D, >$001B, >$0019
+    .db >$0018, >$0016, >$0015, >$0014, >$0013, >$0012, >$0011, >$0010, >$000F, >$000E, >$000D, >$000C
 
 ;Maps NTSC to NTSC tempo, maps PAL and Dendy to
 ;faster PAL tempo in song and sfx headers.
@@ -303,93 +279,85 @@ sound_region_to_tempo_offset:
     .db 0, 2, 2
 
 channel_callback_table_lo:
-    .dl (square_1_play_note)
-    .dl (square_2_play_note)
-    .dl (triangle_play_note)
-    .dl (noise_play_note)
+    .db <square_1_play_note
+    .db <square_2_play_note
+    .db <triangle_play_note
+    .db <noise_play_note
     ifdef FEATURE_DPCM
-    .dl (dpcm_play_note)
+    .db <dpcm_play_note
     endif
 
 channel_callback_table_hi:
-    .dh (square_1_play_note)
-    .dh (square_2_play_note)
-    .dh (triangle_play_note)
-    .dh (noise_play_note)
+    .db >square_1_play_note
+    .db >square_2_play_note
+    .db >triangle_play_note
+    .db >noise_play_note
     ifdef FEATURE_DPCM
-    .dh (dpcm_play_note)
+    .db >dpcm_play_note
     endif
 
 stream_callback_table_lo:
-    .dl (stream_set_length_s)
-    .dl (stream_set_length_s)
-    .dl (stream_set_length_s)
-    .dl (stream_set_length_s)
-    .dl (stream_set_length_s)
-    .dl (stream_set_length_s)
-    .dl (stream_set_length_s)
-    .dl (stream_set_length_s)
-    .dl (stream_set_length_s)
-    .dl (stream_set_length_s)
-    .dl (stream_set_length_s)
-    .dl (stream_set_length_s)
-    .dl (stream_set_length_s)
-    .dl (stream_set_length_s)
-    .dl (stream_set_length_s)
-    .dl (stream_set_length_s)
-    .dl (stream_set_length_lo)
-    .dl (stream_set_length_hi)
-    .dl (stream_set_volume_envelope)
-    .dl (stream_set_pitch_envelope)
-    .dl (stream_set_duty_envelope)
-    .dl (stream_goto)
-    .dl (stream_call)
-    .dl (stream_return)
-    .dl (stream_terminate)
-    ifdef FEATURE_ARPEGGIOS
-    .dl (stream_set_arpeggio_envelope)
-    endif
+    .db <stream_set_length_s
+    .db <stream_set_length_s
+    .db <stream_set_length_s
+    .db <stream_set_length_s
+    .db <stream_set_length_s
+    .db <stream_set_length_s
+    .db <stream_set_length_s
+    .db <stream_set_length_s
+    .db <stream_set_length_s
+    .db <stream_set_length_s
+    .db <stream_set_length_s
+    .db <stream_set_length_s
+    .db <stream_set_length_s
+    .db <stream_set_length_s
+    .db <stream_set_length_s
+    .db <stream_set_length_s
+    .db <stream_set_length_lo
+    .db <stream_set_length_hi
+    .db <stream_set_instrument
+    .db <stream_goto
+    .db <stream_call
+    .db <stream_return
+    .db <stream_terminate
 
 stream_callback_table_hi:
-    .dh (stream_set_length_s)
-    .dh (stream_set_length_s)
-    .dh (stream_set_length_s)
-    .dh (stream_set_length_s)
-    .dh (stream_set_length_s)
-    .dh (stream_set_length_s)
-    .dh (stream_set_length_s)
-    .dh (stream_set_length_s)
-    .dh (stream_set_length_s)
-    .dh (stream_set_length_s)
-    .dh (stream_set_length_s)
-    .dh (stream_set_length_s)
-    .dh (stream_set_length_s)
-    .dh (stream_set_length_s)
-    .dh (stream_set_length_s)
-    .dh (stream_set_length_s)
-    .dh (stream_set_length_lo)
-    .dh (stream_set_length_hi)
-    .dh (stream_set_volume_envelope)
-    .dh (stream_set_pitch_envelope)
-    .dh (stream_set_duty_envelope)
-    .dh (stream_goto)
-    .dh (stream_call)
-    .dh (stream_return)
-    .dh (stream_terminate)
-    ifdef FEATURE_ARPEGGIOS
-    .dh (stream_set_arpeggio_envelope)
-    endif
+    .db >stream_set_length_s
+    .db >stream_set_length_s
+    .db >stream_set_length_s
+    .db >stream_set_length_s
+    .db >stream_set_length_s
+    .db >stream_set_length_s
+    .db >stream_set_length_s
+    .db >stream_set_length_s
+    .db >stream_set_length_s
+    .db >stream_set_length_s
+    .db >stream_set_length_s
+    .db >stream_set_length_s
+    .db >stream_set_length_s
+    .db >stream_set_length_s
+    .db >stream_set_length_s
+    .db >stream_set_length_s
+    .db >stream_set_length_lo
+    .db >stream_set_length_hi
+    .db >stream_set_instrument
+    .db >stream_goto
+    .db >stream_call
+    .db >stream_return
+    .db >stream_terminate
 
 ifdef FEATURE_ARPEGGIOS
+
 arpeggio_callback_table_lo:
-    .dl arpeggio_absolute-1
-    .dl arpeggio_fixed-1
-    .dl arpeggio_relative-1
+    .db <(arpeggio_absolute-1)
+    .db <(arpeggio_fixed-1)
+    .db <(arpeggio_relative-1)
 
 arpeggio_callback_table_hi:
-    .dh arpeggio_absolute-1
-    .dh arpeggio_fixed-1
-    .dh arpeggio_relative-1
+    .db >(arpeggio_absolute-1)
+    .db >(arpeggio_fixed-1)
+    .db >(arpeggio_relative-1)
+
 endif
 
 ;****************************************************************
@@ -399,22 +367,23 @@ endif
 
 square_1_play_note:
 
+    ;Load instrument index.
+    ldy stream_instrument_index,x
+    ;Load instrument address.
+    lda (base_address_instruments),y
+    sta sound_local_word_0
+    iny
+    lda (base_address_instruments),y
+    sta sound_local_word_0+1
+
     ;Set negate flag for sweep unit.
     lda #$08
     sta stream_channel_register_2,x
 
     ifdef FEATURE_ARPEGGIOS
-    ;Load arpeggio index.
-    ldy stream_arpeggio_index,x
-    ;Load arpeggio address.
-    lda (base_address_arpeggio_envelopes),y
-    sta sound_local_word_0
-    iny
-    lda (base_address_arpeggio_envelopes),y
-    sta sound_local_word_0+1
 
     ;Get arpeggio type.
-    ldy #0
+    ldy #instrument_header_arpeggio_type
     lda (sound_local_word_0),y
     tay
 
@@ -428,7 +397,7 @@ square_1_play_note:
     lda arpeggio_callback_table_lo,y
     pha
     rts
-    @return_from_arpeggio_callback:
+@return_from_arpeggio_callback:
 
     else
 
@@ -457,14 +426,7 @@ square_1_play_note:
     and #STREAM_SILENCE_TEST
     bne @silence_until_note
 @note_not_silenced:
-    ;Load volume index.
-    ldy stream_volume_index,x
-    ;Load volume address.
-    lda (base_address_volume_envelopes),y
-    sta sound_local_word_0
-    iny
-    lda (base_address_volume_envelopes),y
-    sta sound_local_word_0+1
+
     ;Load volume offset.
     ldy stream_volume_offset,x
 
@@ -506,14 +468,6 @@ square_1_play_note:
 
 @done:
 
-    ;Load pitch index.
-    ldy stream_pitch_index,x
-    ;Load pitch address.
-    lda (base_address_pitch_envelopes),y
-    sta sound_local_word_0
-    iny
-    lda (base_address_pitch_envelopes),y
-    sta sound_local_word_0+1
     ;Load pitch offset.
     ldy stream_pitch_offset,x
 
@@ -565,15 +519,7 @@ square_1_play_note:
 @pitch_stop:
 
 @duty_code:
-    ;Load duty index.
-    ldy stream_duty_index,x
-    ;Load duty address.
-    lda (base_address_duty_envelopes),y
-    sta sound_local_word_0
-    iny
-    lda (base_address_duty_envelopes),y
-    sta sound_local_word_0+1
-    ;Load duty offset.
+
     ldy stream_duty_offset,x
 
     ;Load duty value for this frame, but hard code flags and duty for now.
@@ -604,25 +550,23 @@ square_1_play_note:
 
     rts
 
+
 square_2_play_note = square_1_play_note
 
 triangle_play_note:
 
-    ;Load note index
-    ldy stream_note,x
-
-    ifdef FEATURE_ARPEGGIOS
-    ;Load arpeggio index.
-    ldy stream_arpeggio_index,x
-    ;Load arpeggio address.
-    lda (base_address_arpeggio_envelopes),y
+    ;Load instrument index.
+    ldy stream_instrument_index,x
+    ;Load instrument address.
+    lda (base_address_instruments),y
     sta sound_local_word_0
     iny
-    lda (base_address_arpeggio_envelopes),y
+    lda (base_address_instruments),y
     sta sound_local_word_0+1
 
+    ifdef FEATURE_ARPEGGIOS
     ;Get arpeggio type.
-    ldy #0
+    ldy #instrument_header_arpeggio_type
     lda (sound_local_word_0),y
     tay
 
@@ -636,7 +580,7 @@ triangle_play_note:
     lda arpeggio_callback_table_lo,y
     pha
     rts
-    @return_from_arpeggio_callback:
+@return_from_arpeggio_callback:
 
     else
 
@@ -661,14 +605,6 @@ triangle_play_note:
     sta stream_channel_register_4,x
 @pitch_already_loaded:
 
-    ;Load volume index.
-    ldy stream_volume_index,x
-    ;Load volume address.
-    lda (base_address_volume_envelopes),y
-    sta sound_local_word_0
-    iny
-    lda (base_address_volume_envelopes),y
-    sta sound_local_word_0+1
     ;Load volume offset.
     ldy stream_volume_offset,x
 
@@ -695,14 +631,6 @@ triangle_play_note:
 
 @volume_stop:
 
-    ;Load pitch index.
-    ldy stream_pitch_index,x
-    ;Load pitch address.
-    lda (base_address_pitch_envelopes),y
-    sta sound_local_word_0
-    iny
-    lda (base_address_pitch_envelopes),y
-    sta sound_local_word_0+1
     ;Load pitch offset.
     ldy stream_pitch_offset,x
 
@@ -755,20 +683,21 @@ triangle_play_note:
 
     rts
 
+
 noise_play_note:
 
-    ifdef FEATURE_ARPEGGIOS
-    ;Load arpeggio index.
-    ldy stream_arpeggio_index,x
-    ;Load arpeggio address.
-    lda (base_address_arpeggio_envelopes),y
+    ;Load instrument index.
+    ldy stream_instrument_index,x
+    ;Load instrument address.
+    lda (base_address_instruments),y
     sta sound_local_word_0
     iny
-    lda (base_address_arpeggio_envelopes),y
+    lda (base_address_instruments),y
     sta sound_local_word_0+1
 
+    ifdef FEATURE_ARPEGGIOS
     ;Get arpeggio type.
-    ldy #0
+    ldy #instrument_header_arpeggio_type
     lda (sound_local_word_0),y
     tay
 
@@ -782,7 +711,7 @@ noise_play_note:
     lda arpeggio_callback_table_lo,y
     pha
     rts
-    @return_from_arpeggio_callback:
+@return_from_arpeggio_callback:
 
     else
 
@@ -808,14 +737,6 @@ noise_play_note:
     sta stream_channel_register_3,x
 @pitch_already_loaded:
 
-    ;Load volume index.
-    ldy stream_volume_index,x
-    ;Load volume address.
-    lda (base_address_volume_envelopes),y
-    sta sound_local_word_0
-    iny
-    lda (base_address_volume_envelopes),y
-    sta sound_local_word_0+1
     ;Load volume offset.
     ldy stream_volume_offset,x
 
@@ -842,14 +763,6 @@ noise_play_note:
     inc stream_volume_offset,x
 @volume_stop:
 
-    ;Load pitch index.
-    ldy stream_pitch_index,x
-    ;Load pitch address.
-    lda (base_address_pitch_envelopes),y
-    sta sound_local_word_0
-    iny
-    lda (base_address_pitch_envelopes),y
-    sta sound_local_word_0+1
     ;Load pitch offset.
     ldy stream_pitch_offset,x
 
@@ -888,14 +801,6 @@ noise_play_note:
 @pitch_stop:
 
 @duty_code:
-    ;Load duty index.
-    ldy stream_duty_index,x
-    ;Load duty address.
-    lda (base_address_duty_envelopes),y
-    sta sound_local_word_0
-    iny
-    lda (base_address_duty_envelopes),y
-    sta sound_local_word_0+1
     ;Load duty offset.
     ldy stream_duty_offset,x
 
@@ -916,7 +821,7 @@ noise_play_note:
 
     ;We only care about bit 6 for noise, and we want it in bit 7 position.
     lda (sound_local_word_0),y
-    asl
+    asl a
     sta sound_local_byte_0
 
     lda stream_channel_register_3,x
@@ -930,6 +835,7 @@ noise_play_note:
 @duty_stop:
 
     rts
+
 
 ifdef FEATURE_DPCM
 dpcm_play_note:
@@ -963,12 +869,12 @@ dpcm_play_note:
     ;Upload the dpcm data if sfx commands are not overriding.
     lda apu_dpcm_state
     cmp #DPCM_STATE_WAIT
-    beq @skip_update_apu_dpcm_state
+    beq @skip
     cmp #DPCM_STATE_UPLOAD_THEN_WAIT
-    beq @skip_update_apu_dpcm_state
+    beq @skip
     lda #DPCM_STATE_UPLOAD
     sta apu_dpcm_state
-@skip_update_apu_dpcm_state:
+@skip:
 
     lda stream_flags,x
     ora #STREAM_SILENCE_SET
@@ -977,6 +883,7 @@ dpcm_play_note:
 @note_already_played:
 
     rts
+
 endif
 
 ifdef FEATURE_ARPEGGIOS
@@ -1035,6 +942,7 @@ arpeggio_absolute:
 @done:
 
     rts
+
 
 arpeggio_fixed:
 
@@ -1100,6 +1008,7 @@ arpeggio_fixed:
 
     rts
 
+
 arpeggio_relative:
 
     ldy stream_arpeggio_offset,x
@@ -1123,7 +1032,7 @@ arpeggio_relative:
     cmp #HIGHEST_NOTE
     bmi @skip
     lda #HIGHEST_NOTE
-    @skip
+@skip:
     sta stream_note,x
     tay
     ;Advance arpeggio offset.
@@ -1160,6 +1069,7 @@ arpeggio_relative:
 
     rts
 
+
 endif
 
 ;****************************************************************
@@ -1167,7 +1077,7 @@ endif
 ;until exhausted.
 ;****************************************************************
 
-stream_set_volume_envelope:
+stream_set_instrument:
 
     advance_stream_read_address
     ;Load byte at read address.
@@ -1178,64 +1088,29 @@ stream_set_volume_envelope:
     ldy #0
     lda (sound_local_word_0),y
     asl a
-    sta stream_volume_index,x
-    lda #0
+    sta stream_instrument_index,x
+    tay
+
+    lda (base_address_instruments),y
+    sta sound_local_word_0
+    iny
+    lda (base_address_instruments),y
+    sta sound_local_word_0+1
+
+    ldy #0
+    lda (sound_local_word_0),y
     sta stream_volume_offset,x
-
-    rts
-
-  ifdef FEATURE_ARPEGGIOS
-
-stream_set_arpeggio_envelope:
-
-    advance_stream_read_address
-    ;Load byte at read address.
-    lda stream_read_address_lo,x
-    sta sound_local_word_0
-    lda stream_read_address_hi,x
-    sta sound_local_word_0+1
-    ldy #0
+    iny
     lda (sound_local_word_0),y
-    asl a
-    sta stream_arpeggio_index,x
-    lda #1
-    sta stream_arpeggio_offset,x
-
-    rts
-
-  endif
-
-stream_set_pitch_envelope:
-
-    advance_stream_read_address
-    ;Load byte at read address.
-    lda stream_read_address_lo,x
-    sta sound_local_word_0
-    lda stream_read_address_hi,x
-    sta sound_local_word_0+1
-    ldy #0
-    lda (sound_local_word_0),y
-    asl a
-    sta stream_pitch_index,x
-    lda #0
     sta stream_pitch_offset,x
-
-    rts
-
-stream_set_duty_envelope:
-
-    advance_stream_read_address
-    ;Load byte at read address.
-    lda stream_read_address_lo,x
-    sta sound_local_word_0
-    lda stream_read_address_hi,x
-    sta sound_local_word_0+1
-    ldy #0
+    iny
     lda (sound_local_word_0),y
-    asl a
-    sta stream_duty_index,x
-    lda #0
     sta stream_duty_offset,x
+    ifdef FEATURE_ARPEGGIOS
+    iny
+    lda (sound_local_word_0),y
+    sta stream_arpeggio_offset,x
+    endif
 
     rts
 
@@ -1257,6 +1132,7 @@ stream_set_length_s:
     sta stream_note_length_counter_hi,x
 
     rts
+
 
 stream_set_length_lo:
 
@@ -1318,6 +1194,7 @@ stream_goto:
 
     rts
 
+
 ;This opcode stores the current stream read address in
 ;return_stream_read_address (lo and hi) and then reads the
 ;following two bytes and stores them in the current stream read address.
@@ -1352,13 +1229,14 @@ stream_call:
     ;Finally, transfer address we are calling to current read address.
     sec
     lda sound_local_word_1
-    sbc #<(1)
+    sbc #<1
     sta stream_read_address_lo,x
     lda sound_local_word_1+1
-    sbc #>(1)
+    sbc #>1
     sta stream_read_address_hi,x
 
     rts
+
 
 ;This opcode restores the stream_return_address to the stream_read_address
 ;and continues where it left off.
@@ -1370,6 +1248,7 @@ stream_return:
     sta stream_read_address_hi,x
 
     rts
+
 
 ;This opcode returns from the parent caller by popping two bytes off
 ;the stack and then doing rts.
@@ -1420,7 +1299,7 @@ play_song:
 
     ;Get song address from song list.
     lda sound_param_byte_0
-    asl
+    asl a
     tay
     lda (song_list_address),y
     sta song_address
@@ -1613,6 +1492,7 @@ play_song:
 
     rts
 
+
 ;Expects sound_param_byte_0 to contain the index of the sound effect to play.
 ;Expects sound_param_byte_1 to contain the sound effect priority. This can
 ;be one of two values: soundeffect_one, and soundeffect_two from ggsound.inc.
@@ -1637,7 +1517,7 @@ play_sfx:
 
     ;Get sfx address from sfx list.
     lda sound_param_byte_0
-    asl
+    asl a
     tay
     lda (sfx_list_address),y
     sta sfx_address
@@ -1683,9 +1563,9 @@ play_sfx:
 
     lda sfx_stream
     cmp #(soundeffect_two + 1)
-    bne @skip
+    bne @skip0
     jmp @no_more_sfx_streams_available
-@skip:
+@skip0:
 
     ;Load square 2 stream.
     ldy #track_header_square2_stream_address
@@ -1722,9 +1602,9 @@ play_sfx:
 
     lda sfx_stream
     cmp #(soundeffect_two + 1)
-    bne @skip2
+    bne @skip1
     jmp @no_more_sfx_streams_available
-@skip2:
+@skip1:
 
     ;Load triangle stream.
     ldy #track_header_triangle_stream_address
@@ -1831,7 +1711,7 @@ play_sfx:
     lda #DPCM_STATE_UPLOAD_THEN_WAIT
     sta apu_dpcm_state
 @no_dpcm:
-    endif
+   endif
 
 @no_more_sfx_streams_available:
 
@@ -1844,6 +1724,7 @@ play_sfx:
     tay
 
     rts
+
 
 ;Pauses all music streams by clearing volume bits from all channel registers
 ;and setting the pause flag so these streams are not updated.
@@ -1865,6 +1746,7 @@ pause_song:
 
     rts
 
+
 ;Resumes all music streams.
 resume_song:
 
@@ -1879,6 +1761,7 @@ resume_song:
     bpl @next_stream
 
     rts
+
 
 ;Expects sound_param_byte_0 to contain the channel on which to play the stream.
 ;Expects sound_param_byte_1 to contain the offset of the stream instance to initialize.
@@ -1914,18 +1797,13 @@ starting_read_address = sound_param_word_0
     sta stream_note_length_hi,x
     sta stream_note_length_counter_hi,x
 
-    ;Set initial envelope indices.
+    ;Set initial instrument index.
     lda #0
-    sta stream_volume_index,x
-    sta stream_pitch_index,x
-    sta stream_duty_index,x
+    sta stream_instrument_index,x
     sta stream_volume_offset,x
     sta stream_pitch_offset,x
     sta stream_duty_offset,x
     ifdef FEATURE_ARPEGGIOS
-    sta stream_arpeggio_index,x
-    ;Set arpeggio offset to 1 because index 0 contains arpeggio type.
-    lda #1
     sta stream_arpeggio_offset,x
     endif
 
@@ -1940,10 +1818,10 @@ starting_read_address = sound_param_word_0
     sta stream_read_address_hi,x
 
     ;Set default tempo.
-    lda #<(DEFAULT_TEMPO)
+    lda #<DEFAULT_TEMPO
     sta stream_tempo_lo,x
     sta stream_tempo_counter_lo,x
-    lda #>(DEFAULT_TEMPO)
+    lda #>DEFAULT_TEMPO
     sta stream_tempo_hi,x
     sta stream_tempo_counter_hi,x
 
@@ -1974,6 +1852,7 @@ stream_stop:
 
     rts
 
+
 ;Updates a single stream.
 ;Expects x to be pointing to a stream instance as an offset from streams.
 stream_update:
@@ -1982,9 +1861,9 @@ read_address = sound_local_word_1
 
     lda stream_flags,x
     and #STREAM_PAUSE_TEST
-    beq @skip_paused
+    beq @skip0
     rts
-@skip_paused:
+@skip0:
 
     ;Load current read address of stream.
     lda stream_read_address_lo,x
@@ -1995,11 +1874,11 @@ read_address = sound_local_word_1
     ;Load next byte from stream data.
     lda stream_flags,x
     and #STREAM_PITCH_LOADED_TEST
-    bne @skip
+    bne @skip1
     ldy #0
     lda (read_address),y
     sta stream_note,x
-    @skip
+@skip1:
 
     ;Is this byte a note or a stream opcode?
     cmp #OPCODES_BASE
@@ -2029,6 +1908,7 @@ read_address = sound_local_word_1
     ;address off the stack and then performing an rts, effectively returning
     ;from its caller, this routine.
     jmp stream_update
+
 @process_note:
 
     ;Determine which channel callback to use.
@@ -2044,10 +1924,10 @@ read_address = sound_local_word_1
 
     sec
     lda stream_tempo_counter_lo,x
-    sbc #<(256)
+    sbc #<256
     sta stream_tempo_counter_lo,x
     lda stream_tempo_counter_hi,x
-    sbc #>(256)
+    sbc #>256
     sta stream_tempo_counter_hi,x
     bcs @do_not_advance_note_length_counter
 
@@ -2065,10 +1945,10 @@ read_address = sound_local_word_1
     ;Decrement the note length counter.. On zero, advance the stream's read address.
     sec
     lda stream_note_length_counter_lo,x
-    sbc #<(1)
+    sbc #<1
     sta stream_note_length_counter_lo,x
     lda stream_note_length_counter_hi,x
-    sbc #>(1)
+    sbc #>1
     sta stream_note_length_counter_hi,x
 
     lda stream_note_length_counter_lo,x
@@ -2082,14 +1962,24 @@ read_address = sound_local_word_1
     lda stream_note_length_hi,x
     sta stream_note_length_counter_hi,x
 
-    ;Reset volume, pitch, and duty offsets.
-    lda #0
+    ldy stream_instrument_index,x
+    lda (base_address_instruments),y
+    sta sound_local_word_0
+    iny
+    lda (base_address_instruments),y
+    sta sound_local_word_0+1
+    ldy #0
+    lda (sound_local_word_0),y
     sta stream_volume_offset,x
+    iny
+    lda (sound_local_word_0),y
     sta stream_pitch_offset,x
+    iny
+    lda (sound_local_word_0),y
     sta stream_duty_offset,x
     ifdef FEATURE_ARPEGGIOS
-    ;Set arpeggio offset to 1 because index 0 contains arpeggio type.
-    lda #1
+    iny
+    lda (sound_local_word_0),y
     sta stream_arpeggio_offset,x
     endif
 
@@ -2109,6 +1999,7 @@ read_address = sound_local_word_1
 indirect_jsr_callback_address:
     jmp (callback_address)
     rts
+
 
 sound_initialize_apu_buffer:
 
@@ -2213,7 +2104,6 @@ sound_upload:
 
     rts
 
-;This is adapted from MetalSlime's Nerdy Nights sound engine.
 sound_upload_apu_register_sets:
 @square1:
     lda apu_register_sets+0
@@ -2272,41 +2162,47 @@ sound_upload_apu_register_sets:
     ifdef FEATURE_DPCM
     ;Now execute DPCM command/state machine. This state machine has logic for allowing
     ;a DPCM sound effect to override the currenty playing music DPCM sample until finished.
-dpcm:
+@dpcm:
     ldx apu_dpcm_state
-    lda dpcm_state_callback_hi,x
+    lda @dpcm_state_callback_hi,x
     pha
-    lda dpcm_state_callback_lo,x
+    lda @dpcm_state_callback_lo,x
     pha
     rts
-dpcm_upload:
-    jsr dpcm_upload_registers
+@dpcm_upload:
+    jsr @dpcm_upload_registers
     lda #DPCM_STATE_NOP
     sta apu_dpcm_state
     rts
-dpcm_upload_then_wait:
-    jsr dpcm_upload_registers
+@dpcm_upload_then_wait:
+    jsr @dpcm_upload_registers
     lda #DPCM_STATE_WAIT
     sta apu_dpcm_state
     rts
-dpcm_wait:
+@dpcm_wait:
     lda $4015
     and #%00010000
-    bne @skip_reset_apu_dpcm_state
+    bne @skip
     lda #DPCM_STATE_NOP
     sta apu_dpcm_state
-@skip_reset_apu_dpcm_state:
+@skip:
     rts
-dpcm_nop:
+@dpcm_nop:
     rts
 
-dpcm_state_callback_lo:
-    .dl (dpcm_nop-1), (dpcm_upload-1), (dpcm_upload_then_wait-1), (dpcm_wait-1)
+@dpcm_state_callback_lo:
+    .db <(@dpcm_nop-1)
+    .db <(@dpcm_upload-1)
+    .db <(@dpcm_upload_then_wait-1)
+    .db <(@dpcm_wait-1)
 
-dpcm_state_callback_hi:
-    .dh (dpcm_nop-1), (dpcm_upload-1), (dpcm_upload_then_wait-1), (dpcm_wait-1)
+@dpcm_state_callback_hi:
+    .db >(@dpcm_nop-1)
+    .db >(@dpcm_upload-1)
+    .db >(@dpcm_upload_then_wait-1)
+    .db >(@dpcm_wait-1)
 
-dpcm_upload_registers:
+@dpcm_upload_registers:
     lda apu_register_sets+16
     sta $4010
     lda apu_register_sets+17
@@ -2324,4 +2220,3 @@ dpcm_upload_registers:
     else
     rts
     endif
-

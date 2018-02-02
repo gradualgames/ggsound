@@ -157,26 +157,20 @@ SLL = 16+OPCODES_BASE
 ;set length hi byte
 SLH = 17+OPCODES_BASE
 
-;set volume envelope
-STV = 18+OPCODES_BASE
-
-;set pitch envelope
-STP = 19+OPCODES_BASE
-
-;set duty envelope
-SDU = 20+OPCODES_BASE
+;set instrument
+STI = 18+OPCODES_BASE
 
 ;goto
-GOT = 21+OPCODES_BASE
+GOT = 19+OPCODES_BASE
 
 ;call
-CAL = 22+OPCODES_BASE
+CAL = 20+OPCODES_BASE
 
 ;return
-RET = 23+OPCODES_BASE
+RET = 21+OPCODES_BASE
 
 ;terminate
-TRM = 24+OPCODES_BASE
+TRM = 22+OPCODES_BASE
 
 ifdef FEATURE_ARPEGGIOS
 ;set arpeggio envelope
@@ -236,6 +230,12 @@ track_header_noise_stream_address     = 10
 ifdef FEATURE_DPCM
 track_header_dpcm_stream_address      = 12
 endif
+
+instrument_header_volume_offset = 0
+instrument_header_pitch_offset = 1
+instrument_header_duty_offset = 2
+instrument_header_arpeggio_offset = 3
+instrument_header_arpeggio_type = 4
 
 macro advance_stream_read_address
 

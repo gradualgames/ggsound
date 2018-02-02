@@ -1,16 +1,17 @@
-#This is a script which will convert everything after
-#.segment "CODE" in ggsound.asm to asm6 and nesasm syntax to
-#help save me time converting ggsound to asm6 and nesasm each
-#time I make an update and to ensure that this is a less error
-#prone process. I am still updating the headers manually. I'm
-#not expecting anybody else to use this file or use it for converting
-#any other program, as it is nowhere near exhaustive for converting
-#from ca65 to asm6 and nesasm. Just feed in ggsound.asm to run it and
-#it will spit out ggsound_asm6.asm and ggsound_nesasm.asm.
+# This is a script which will convert everything after
+# .segment "CODE" in ggsound.asm to asm6 and nesasm syntax to
+# help save me time converting ggsound to asm6 and nesasm each
+# time I make an update and to ensure that this is a less error
+# prone process. I am still updating the headers manually. I'm
+# not expecting anybody else to use this file or use it for converting
+# any other program, as it is nowhere near exhaustive for converting
+# from ca65 to asm6 and nesasm. Just feed in ggsound.asm to run it and
+# it will spit out ggsound_asm6.asm and ggsound_nesasm.asm.
 
 import os
 import sys
 import re
+
 
 def main():
     if len(sys.argv) != 2:
@@ -102,9 +103,9 @@ def main():
             if scope_depth > 0:
                 asm6_prefix = "@"
                 nesasm_prefix = "."
+                labels.append(line[:-2])
             asm6.append("%s%s" % (asm6_prefix, line))
             nesasm.append("%s%s" % (nesasm_prefix, line))
-            labels.append(line[:-2])
             continue
         pattern = re.compile("[a-z0-9_]+ = [a-z0-9_]")
         if pattern.match(line):
@@ -114,22 +115,26 @@ def main():
         asm6.append(line.strip() + " ;did not convert\n")
         nesasm.append(line.strip() + " ;did not convert\n")
 
-    #Now look for usages of labels and get their prefixes in place
-    for line in asm6:
-        for label in labels:
-            if label in line:
-                pattern = re.compile("(    b.. .*)|(    jmp .*)")
-                if pattern.match(line):
-                    line.replace(label, "@%s" % label)
-                else:
-                    line = line.strip() + " ;erroneously detected label\n"
-            
+    # Now look for usages of labels and get their prefixes in place
+    for i in range(0, len(asm6)):
+        line = asm6[i]
+        pattern = re.compile(".*;.*")
+        if not pattern.match(line):
+            for label in labels:
+                if label in line:
+                    possible_labels = []
+                    for match in re.finditer("(?<!@)[a-zA-Z0-9_]+", line):
+                        possible_labels.append(match.group(0))
+                    if label in possible_labels:
+                        asm6[i] = line.replace(label, "@%s" % label)
+
     with open(asm6_output_file, 'w') as f:
         for line in asm6:
             f.write(line)
     with open(nesasm_output_file, 'w') as f:
         for line in nesasm:
             f.write(line)
+
 
 if __name__ == '__main__':
     main()
