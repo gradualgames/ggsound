@@ -1,4 +1,3 @@
-  LIST
   include "ppu.inc"
   include "ggsound.inc"
   include "controller.inc"
