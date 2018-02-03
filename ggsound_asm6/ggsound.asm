@@ -2201,8 +2201,6 @@ sound_upload_apu_register_sets:
 @dpcm_upload_registers:
     lda apu_register_sets+16
     sta $4010
-    lda apu_register_sets+17
-    sta $4011
     lda apu_register_sets+18
     sta $4012
     lda apu_register_sets+19
