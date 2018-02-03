@@ -570,9 +570,9 @@ def main():
             duty_macro = macros["duty"][instrument["duty"]]
             arpeggio_macro = macros["arpeggio"][instrument["arpeggio"]]
 
-            loop_point_offset = 3
+            total_bytes = 3
             if ARPEGGIOS_ENABLED:
-                loop_point_offset = 5
+                total_bytes = 5
             instrument_asm = []
             instrument_offsets = []
 
@@ -588,7 +588,7 @@ def main():
                 prefix = prefixes[i]
                 value_lambda = value_lambdas[i]
                 instrument_asm.append(define_byte_directive)
-                instrument_offsets.append(loop_point_offset)
+                instrument_offsets.append(total_bytes)
                 for value in macro["values"]:
                     instrument_asm.append("%s," % value_lambda(value))
                     macro_length += 1
@@ -596,9 +596,9 @@ def main():
                     instrument_asm.append("%sENV_STOP\n" % prefix)
                     macro_length += 1
                 else:
-                    instrument_asm.append("%sENV_LOOP,%s\n" % (prefix, macro["loop_point"] + loop_point_offset))
+                    instrument_asm.append("%sENV_LOOP,%s\n" % (prefix, macro["loop_point"] + total_bytes))
                     macro_length += 2
-                loop_point_offset += macro_length
+                total_bytes += macro_length
 
             f.write("%s:\n" % instrument_name)
             f.write(define_byte_directive)
@@ -609,9 +609,8 @@ def main():
                 f.write(",%s," % instrument_offsets[3])
                 f.write("%s" % arpeggio_sub_type_to_str[arpeggio_macro["sub_type"]])
             f.write("\n")
-            total_instrument_length = 4 + len(instrument_asm)
-            if total_instrument_length <= 256:
-                print("Output instrument: \"%s\" total length: %s" % (instrument_name, total_instrument_length))
+            if total_bytes <= 256:
+                print("Output instrument: \"%s\" total length: %s" % (instrument_name, total_bytes))
                 for byte in instrument_asm:
                     f.write(byte)
             else:
