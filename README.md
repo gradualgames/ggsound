@@ -52,6 +52,7 @@ currently supports:
 
 - Square 1, 2, Triangle, Noise, and DPCM channels
 - Volume, Arpeggio, Pitch and Duty envelopes
+- All three arpeggio types are supported.
 - Hi-Pitch envelopes are NOT supported
 - Looping envelopes at an arbitrary loop point
 - Speed and Tempo
@@ -63,10 +64,9 @@ unique patterns) command
 - Sound effects on two channels
 - Pause/unpause
 - Full 96 note range of FamiTracker
-- 128 of each type of envelope
+- 128 instruments
 - 128 songs
 - 128 sound effects
-- 256 byte long envelopes
 
 # Credits:
 * MotZilla - For testing a very early version of the engine.
@@ -96,6 +96,13 @@ to help exercise GGSound and the converter.
 exercise GGSound.
 
 # Changes:
+* 2-2-18:  Refactored how envelopes are stored and read during execution
+           into a "compact instrument" 256 byte format. This helps performance
+           but introduces the limitation that you cannot have extremely long
+           volume, pitch or other envelopes togehter in one instrument, but
+           should still be useful for most common use cases. You can work around
+           this limitation with additional instruments in the rare case you need
+           many long envelopes end to end.
 * 1-25-18: Refactored arpeggio execution to support all three
            arpeggio types: absolute, fixed and relative. Re-tested
            with FamiCuber's track. This is a new feature, please
@@ -263,37 +270,48 @@ a limitation in ft_txt_to_asm.py. Known limitations are documented below.
 
 ft_txt_to_asm.py does not convert your famitracker data verbatim.
 It uses a subset of all the possible features you can use
-within a song. Here are a list of all the features that are
-currently supported:
+within a song. Here are a list of all the famitracker features and
+settings that are currently supported:
 
-- speed
-- tempo
-- pattern length
-- frames
-- multi song files
+- Track speed
+- Track tempo
+- Pattern length
+- Frames
+- Multi-song files
 - "Bxx" effect. This is for looping a song which does not end at
 the end of a frame. MAKE SURE TO INCLUDE THIS EFFECT AT THE END
 OF EACH OF YOUR SONG'S CHANNELS OR THE DATA WILL NOT BE CORRECT.
 THESE MUST BE IN *UNIQUE* PATTERNS.
-- note cuts
-- volume envlopes
-- arpeggio envelopes. These can be disabled if you do not wish
+- Note cuts
+- Volume envelopes
+- Arpeggio envelopes. These can be disabled if you do not wish
 to use them by setting ARPEGGIOS_ENABLED = False within
 ft_txt_to_asm.py, at the top of the file. Just open it in a text
 editor.
-- pitch envelopes
-- hi-pitch envelopes are NOT supported
-- duty envelopes
-- loop points within envelopes
-- all 87 audible notes within FamiTracker are available for you
-to use
+- All three arpeggio types.
+- Pitch envelopes
+- Hi-pitch envelopes are NOT supported
+- Duty envelopes
+- Loop point within envelopes
+- Note that when ft_txt_to_asm.py converts your famitracker text
+file into assembly language, each instrument's constituent envelopes
+will be combined into a compact 256 byte structure. This means if you
+have any extremely long envelopes that will not fit together inside of
+256 bytes, you will not be able to convert your song and the script
+will show you an error. In practice it is rare to have envelopes this
+long. To work around this limitation, you can create additional instruments
+whose envelopes pick up where the previous one left off, but this size should
+work for most purposes.
+- All 96 notes within FamiTracker are available for you
+to use, though pitch will not change below A0, just as in
+FamiTracker itself.
 - DPCM samples. The script assumes only one instrument has DPCM
 samples mapped to it. If you have more than one instrument
 which maps DPCM samples to notes, the behavior will be undefined.
 NOTE: Your DPCM instrument must specify a volume envelope, even
 though it is not used by DPCM. Otherwise, your DPCM stream will
 not be exported.
-- sound effect tracks. To export sound effect tracks, you must
+- Sound effect tracks. To export sound effect tracks, you must
 prefix any song within your famitracker file with "sfx_." This
 lets ft_txt_to_asm.py know to treat this track as a sound effect
 and make sure that it terminates after its longest envelope
