@@ -1,7 +1,7 @@
 ;Expects sound_param_byte_0 to contain desired region (SOUND_REGION_NTSC, SOUND_REGION_PAL, SOUND_REGION_DENDY)
 ;Expects sound_param_word_0 to contain song list address.
 ;Expects sound_param_word_1 to contain sfx list address.
-;Expects sound_param_word_2 to contain envelopes list address.
+;Expects sound_param_word_2 to contain instrument list address.
 ;If FEATURE_DPCM is defined, then
 ;Expects sound_param_word_3 to contain dpcm sample address.
 sound_initialize:
@@ -12,51 +12,25 @@ sound_initialize:
     lda sound_param_byte_0
     sta sound_region
 
+    ;Get songs address.
     lda sound_param_word_0
     sta song_list_address
     lda sound_param_word_0+1
     sta song_list_address+1
 
+    ;Get sfx address.
     lda sound_param_word_1
     sta sfx_list_address
     lda sound_param_word_1+1
     sta sfx_list_address+1
 
-    ;Get volume envelopes address.
-    ldy #0
-    lda [sound_param_word_2],y
-    sta addr_volume_envelopes
-    iny
-    lda [sound_param_word_2],y
-    sta addr_volume_envelopes+1
+    ;Get instruments address.
+    lda sound_param_word_2
+    sta addr_instruments
+    lda sound_param_word_2+1
+    sta addr_instruments+1
 
-    ifdef FEATURE_ARPEGGIOS
-    ;Get arpeggio envelopes address.
-    iny
-    lda [sound_param_word_2],y
-    sta addr_arpeggio_envelopes
-    iny
-    lda [sound_param_word_2],y
-    sta addr_arpeggio_envelopes+1
-    endif
-
-    ;Get pitch envelopes address.
-    iny
-    lda [sound_param_word_2],y
-    sta addr_pitch_envelopes
-    iny
-    lda [sound_param_word_2],y
-    sta addr_pitch_envelopes+1
-
-    ;Get duty envelopes address.
-    iny
-    lda [sound_param_word_2],y
-    sta addr_duty_envelopes
-    iny
-    lda [sound_param_word_2],y
-    sta addr_duty_envelopes+1
-
-    ifdef FEATURE_DPCM
+      ifdef FEATURE_DPCM
     ;Get dpcm samples list.
     ldy #0
     lda [sound_param_word_3],y
@@ -85,7 +59,7 @@ sound_initialize:
     iny
     lda [sound_param_word_3],y
     sta addr_dpcm_note_to_loop_pitch_index+1
-    endif
+      endif
 
     ;Load PAL note table for PAL, NTSC for any other region.
     lda sound_region
@@ -116,12 +90,13 @@ sound_initialize:
     lda #%00001111
     sta $4015
 
+    ;Ensure no apu data is uploaded yet.
     lda #0
     sta apu_data_ready
-    ifdef FEATURE_DPCM
+      ifdef FEATURE_DPCM
     lda #DPCM_STATE_NOP
     sta apu_dpcm_state
-    endif
+      endif
 
     jsr sound_initialize_apu_buffer
 
@@ -131,6 +106,7 @@ sound_initialize:
     dec sound_disable_update
 
     rts
+
 
 ;Kill all active streams and halt sound.
 sound_stop:
@@ -143,13 +119,13 @@ sound_stop:
 
     ;Kill all streams.
     ldx #(MAX_STREAMS-1)
-loop:
+.loop:
 
     lda #0
     sta stream_flags,x
 
     dex
-    bpl loop
+    bpl .loop
 
     jsr sound_initialize_apu_buffer
 
@@ -212,7 +188,7 @@ sound_update:
     inx
     cpx #MAX_MUSIC_STREAMS
     bne .song_stream_register_copy_loop
-do_not_update_music:
+.do_not_update_music:
 
     ldx #soundeffect_one
 .sfx_stream_register_copy_loop:
@@ -307,18 +283,18 @@ channel_callback_table_lo:
     .db low(square_2_play_note)
     .db low(triangle_play_note)
     .db low(noise_play_note)
-    ifdef FEATURE_DPCM
+      ifdef FEATURE_DPCM
     .db low(dpcm_play_note)
-    endif
+      endif
 
 channel_callback_table_hi:
     .db high(square_1_play_note)
     .db high(square_2_play_note)
     .db high(triangle_play_note)
     .db high(noise_play_note)
-    ifdef FEATURE_DPCM
+      ifdef FEATURE_DPCM
     .db high(dpcm_play_note)
-    endif
+      endif
 
 stream_callback_table_lo:
     .db low(stream_set_length_s)
@@ -339,16 +315,11 @@ stream_callback_table_lo:
     .db low(stream_set_length_s)
     .db low(stream_set_length_lo)
     .db low(stream_set_length_hi)
-    .db low(stream_set_volume_envelope)
-    .db low(stream_set_pitch_envelope)
-    .db low(stream_set_duty_envelope)
+    .db low(stream_set_instrument)
     .db low(stream_goto)
     .db low(stream_call)
     .db low(stream_return)
     .db low(stream_terminate)
-    ifdef FEATURE_ARPEGGIOS
-    .db low(stream_set_arpeggio_envelope)
-    endif
 
 stream_callback_table_hi:
     .db high(stream_set_length_s)
@@ -369,28 +340,23 @@ stream_callback_table_hi:
     .db high(stream_set_length_s)
     .db high(stream_set_length_lo)
     .db high(stream_set_length_hi)
-    .db high(stream_set_volume_envelope)
-    .db high(stream_set_pitch_envelope)
-    .db high(stream_set_duty_envelope)
+    .db high(stream_set_instrument)
     .db high(stream_goto)
     .db high(stream_call)
     .db high(stream_return)
     .db high(stream_terminate)
-    ifdef FEATURE_ARPEGGIOS
-    .db high(stream_set_arpeggio_envelope)
-    endif
 
   ifdef FEATURE_ARPEGGIOS
 
 arpeggio_callback_table_lo:
-    .db low(arpeggio_absolute-1)
-    .db low(arpeggio_fixed-1)
-    .db low(arpeggio_relative-1)
+    .db low((arpeggio_absolute-1))
+    .db low((arpeggio_fixed-1))
+    .db low((arpeggio_relative-1))
 
 arpeggio_callback_table_hi:
-    .db high(arpeggio_absolute-1)
-    .db high(arpeggio_fixed-1)
-    .db high(arpeggio_relative-1)
+    .db high((arpeggio_absolute-1))
+    .db high((arpeggio_fixed-1))
+    .db high((arpeggio_relative-1))
 
   endif
 
@@ -401,42 +367,43 @@ arpeggio_callback_table_hi:
 
 square_1_play_note:
 
+    ;Load instrument index.
+    ldy stream_instrument_index,x
+    ;Load instrument address.
+    lda [addr_instruments],y
+    sta sound_local_word_0
+    iny
+    lda [addr_instruments],y
+    sta sound_local_word_0+1
+
     ;Set negate flag for sweep unit.
     lda #$08
     sta stream_channel_register_2,x
 
-    ifdef FEATURE_ARPEGGIOS
-    ;Load arpeggio index.
-    ldy stream_arpeggio_index,x
-    ;Load arpeggio address.
-    lda [addr_arpeggio_envelopes],y
-    sta sound_local_word_0
-    iny
-    lda [addr_arpeggio_envelopes],y
-    sta sound_local_word_0+1
+      ifdef FEATURE_ARPEGGIOS
 
     ;Get arpeggio type.
-    ldy #0
+    ldy #instrument_header_arpeggio_type
     lda [sound_local_word_0],y
     tay
 
     ;Get the address.
-    lda #high(.return_from_arpeggio_callback-1)
+    lda #high((.return_from_arpeggio_callback-1))
     pha
-    lda #low(.return_from_arpeggio_callback-1)
+    lda #low((.return_from_arpeggio_callback-1))
     pha
     lda arpeggio_callback_table_hi,y
     pha
     lda arpeggio_callback_table_lo,y
     pha
     rts
-    .return_from_arpeggio_callback:
+.return_from_arpeggio_callback:
 
-    else
+      else
 
     ldy stream_note,x
 
-    endif
+      endif
 
     ;Skip loading note pitch if already loaded, to allow envelopes
     ;to modify the pitch.
@@ -459,14 +426,7 @@ square_1_play_note:
     and #STREAM_SILENCE_TEST
     bne .silence_until_note
 .note_not_silenced:
-    ;Load volume index.
-    ldy stream_volume_index,x
-    ;Load volume address.
-    lda [addr_volume_envelopes],y
-    sta sound_local_word_0
-    iny
-    lda [addr_volume_envelopes],y
-    sta sound_local_word_0+1
+
     ;Load volume offset.
     ldy stream_volume_offset,x
 
@@ -508,14 +468,6 @@ square_1_play_note:
 
 .done:
 
-    ;Load pitch index.
-    ldy stream_pitch_index,x
-    ;Load pitch address.
-    lda [addr_pitch_envelopes],y
-    sta sound_local_word_0
-    iny
-    lda [addr_pitch_envelopes],y
-    sta sound_local_word_0+1
     ;Load pitch offset.
     ldy stream_pitch_offset,x
 
@@ -567,15 +519,7 @@ square_1_play_note:
 .pitch_stop:
 
 .duty_code:
-    ;Load duty index.
-    ldy stream_duty_index,x
-    ;Load duty address.
-    lda [addr_duty_envelopes],y
-    sta sound_local_word_0
-    iny
-    lda [addr_duty_envelopes],y
-    sta sound_local_word_0+1
-    ;Load duty offset.
+
     ldy stream_duty_offset,x
 
     ;Load duty value for this frame, but hard code flags and duty for now.
@@ -606,42 +550,43 @@ square_1_play_note:
 
     rts
 
+
 square_2_play_note = square_1_play_note
 
 triangle_play_note:
 
-    ifdef FEATURE_ARPEGGIOS
-    ;Load arpeggio index.
-    ldy stream_arpeggio_index,x
-    ;Load arpeggio address.
-    lda [addr_arpeggio_envelopes],y
+    ;Load instrument index.
+    ldy stream_instrument_index,x
+    ;Load instrument address.
+    lda [addr_instruments],y
     sta sound_local_word_0
     iny
-    lda [addr_arpeggio_envelopes],y
+    lda [addr_instruments],y
     sta sound_local_word_0+1
 
+      ifdef FEATURE_ARPEGGIOS
     ;Get arpeggio type.
-    ldy #0
+    ldy #instrument_header_arpeggio_type
     lda [sound_local_word_0],y
     tay
 
     ;Get the address.
-    lda #high(.return_from_arpeggio_callback-1)
+    lda #high((.return_from_arpeggio_callback-1))
     pha
-    lda #low(.return_from_arpeggio_callback-1)
+    lda #low((.return_from_arpeggio_callback-1))
     pha
     lda arpeggio_callback_table_hi,y
     pha
     lda arpeggio_callback_table_lo,y
     pha
     rts
-    .return_from_arpeggio_callback:
+.return_from_arpeggio_callback:
 
-    else
+      else
 
     ldy stream_note,x
 
-    endif
+      endif
 
     ;Skip loading note pitch if already loaded, to allow envelopes
     ;to modify the pitch.
@@ -660,14 +605,6 @@ triangle_play_note:
     sta stream_channel_register_4,x
 .pitch_already_loaded:
 
-    ;Load volume index.
-    ldy stream_volume_index,x
-    ;Load volume address.
-    lda [addr_volume_envelopes],y
-    sta sound_local_word_0
-    iny
-    lda [addr_volume_envelopes],y
-    sta sound_local_word_0+1
     ;Load volume offset.
     ldy stream_volume_offset,x
 
@@ -694,14 +631,6 @@ triangle_play_note:
 
 .volume_stop:
 
-    ;Load pitch index.
-    ldy stream_pitch_index,x
-    ;Load pitch address.
-    lda [addr_pitch_envelopes],y
-    sta sound_local_word_0
-    iny
-    lda [addr_pitch_envelopes],y
-    sta sound_local_word_0+1
     ;Load pitch offset.
     ldy stream_pitch_offset,x
 
@@ -754,40 +683,41 @@ triangle_play_note:
 
     rts
 
+
 noise_play_note:
 
-    ifdef FEATURE_ARPEGGIOS
-    ;Load arpeggio index.
-    ldy stream_arpeggio_index,x
-    ;Load arpeggio address.
-    lda [addr_arpeggio_envelopes],y
+    ;Load instrument index.
+    ldy stream_instrument_index,x
+    ;Load instrument address.
+    lda [addr_instruments],y
     sta sound_local_word_0
     iny
-    lda [addr_arpeggio_envelopes],y
+    lda [addr_instruments],y
     sta sound_local_word_0+1
 
+      ifdef FEATURE_ARPEGGIOS
     ;Get arpeggio type.
-    ldy #0
+    ldy #instrument_header_arpeggio_type
     lda [sound_local_word_0],y
     tay
 
     ;Get the address.
-    lda #high(.return_from_arpeggio_callback-1)
+    lda #high((.return_from_arpeggio_callback-1))
     pha
-    lda #low(.return_from_arpeggio_callback-1)
+    lda #low((.return_from_arpeggio_callback-1))
     pha
     lda arpeggio_callback_table_hi,y
     pha
     lda arpeggio_callback_table_lo,y
     pha
     rts
-    .return_from_arpeggio_callback:
+.return_from_arpeggio_callback:
 
-    else
+      else
 
     ldy stream_note,x
 
-    endif
+      endif
 
     tya
     and #%01111111
@@ -807,14 +737,6 @@ noise_play_note:
     sta stream_channel_register_3,x
 .pitch_already_loaded:
 
-    ;Load volume index.
-    ldy stream_volume_index,x
-    ;Load volume address.
-    lda [addr_volume_envelopes],y
-    sta sound_local_word_0
-    iny
-    lda [addr_volume_envelopes],y
-    sta sound_local_word_0+1
     ;Load volume offset.
     ldy stream_volume_offset,x
 
@@ -841,14 +763,6 @@ noise_play_note:
     inc stream_volume_offset,x
 .volume_stop:
 
-    ;Load pitch index.
-    ldy stream_pitch_index,x
-    ;Load pitch address.
-    lda [addr_pitch_envelopes],y
-    sta sound_local_word_0
-    iny
-    lda [addr_pitch_envelopes],y
-    sta sound_local_word_0+1
     ;Load pitch offset.
     ldy stream_pitch_offset,x
 
@@ -886,15 +800,7 @@ noise_play_note:
 
 .pitch_stop:
 
-duty_code:
-    ;Load duty index.
-    ldy stream_duty_index,x
-    ;Load duty address.
-    lda [addr_duty_envelopes],y
-    sta sound_local_word_0
-    iny
-    lda [addr_duty_envelopes],y
-    sta sound_local_word_0+1
+.duty_code:
     ;Load duty offset.
     ldy stream_duty_offset,x
 
@@ -930,20 +836,21 @@ duty_code:
 
     rts
 
+
   ifdef FEATURE_DPCM
 dpcm_play_note:
 
     ;Determine if silence until note is set.
     lda stream_flags,x
     and #STREAM_SILENCE_TEST
-    bne note_already_played
+    bne .note_already_played
 
     ;Load note index.
     ldy stream_note,x
 
     ;Get sample index.
     lda [addr_dpcm_note_to_sample_index],y
-    bmi no_sample
+    bmi .no_sample
 
     ;This sample index looks up into addr_dpcm_sample_table.
     tay
@@ -962,20 +869,21 @@ dpcm_play_note:
     ;Upload the dpcm data if sfx commands are not overriding.
     lda apu_dpcm_state
     cmp #DPCM_STATE_WAIT
-    beq .skip_update_apu_dpcm_state
+    beq .skip
     cmp #DPCM_STATE_UPLOAD_THEN_WAIT
-    beq .skip_update_apu_dpcm_state
+    beq .skip
     lda #DPCM_STATE_UPLOAD
     sta apu_dpcm_state
-.skip_update_apu_dpcm_state:
+.skip:
 
     lda stream_flags,x
     ora #STREAM_SILENCE_SET
     sta stream_flags,x
-no_sample:
-note_already_played:
+.no_sample:
+.note_already_played:
 
     rts
+
   endif
 
   ifdef FEATURE_ARPEGGIOS
@@ -1034,6 +942,7 @@ arpeggio_absolute:
 .done:
 
     rts
+
 
 arpeggio_fixed:
 
@@ -1099,6 +1008,7 @@ arpeggio_fixed:
 
     rts
 
+
 arpeggio_relative:
 
     ldy stream_arpeggio_offset,x
@@ -1122,7 +1032,7 @@ arpeggio_relative:
     cmp #HIGHEST_NOTE
     bmi .skip
     lda #HIGHEST_NOTE
-    .skip:
+.skip:
     sta stream_note,x
     tay
     ;Advance arpeggio offset.
@@ -1159,6 +1069,7 @@ arpeggio_relative:
 
     rts
 
+
   endif
 
 ;****************************************************************
@@ -1166,7 +1077,7 @@ arpeggio_relative:
 ;until exhausted.
 ;****************************************************************
 
-stream_set_volume_envelope:
+stream_set_instrument:
 
     advance_stream_read_address
     ;Load byte at read address.
@@ -1177,64 +1088,29 @@ stream_set_volume_envelope:
     ldy #0
     lda [sound_local_word_0],y
     asl a
-    sta stream_volume_index,x
-    lda #0
+    sta stream_instrument_index,x
+    tay
+
+    lda [addr_instruments],y
+    sta sound_local_word_0
+    iny
+    lda [addr_instruments],y
+    sta sound_local_word_0+1
+
+    ldy #0
+    lda [sound_local_word_0],y
     sta stream_volume_offset,x
-
-    rts
-
-  ifdef FEATURE_ARPEGGIOS
-
-stream_set_arpeggio_envelope:
-
-    advance_stream_read_address
-    ;Load byte at read address.
-    lda stream_read_address_lo,x
-    sta sound_local_word_0
-    lda stream_read_address_hi,x
-    sta sound_local_word_0+1
-    ldy #0
+    iny
     lda [sound_local_word_0],y
-    asl a
-    sta stream_arpeggio_index,x
-    lda #1
-    sta stream_arpeggio_offset,x
-
-    rts
-
-  endif
-
-stream_set_pitch_envelope:
-
-    advance_stream_read_address
-    ;Load byte at read address.
-    lda stream_read_address_lo,x
-    sta sound_local_word_0
-    lda stream_read_address_hi,x
-    sta sound_local_word_0+1
-    ldy #0
-    lda [sound_local_word_0],y
-    asl a
-    sta stream_pitch_index,x
-    lda #0
     sta stream_pitch_offset,x
-
-    rts
-
-stream_set_duty_envelope:
-
-    advance_stream_read_address
-    ;Load byte at read address.
-    lda stream_read_address_lo,x
-    sta sound_local_word_0
-    lda stream_read_address_hi,x
-    sta sound_local_word_0+1
-    ldy #0
+    iny
     lda [sound_local_word_0],y
-    asl a
-    sta stream_duty_index,x
-    lda #0
     sta stream_duty_offset,x
+      ifdef FEATURE_ARPEGGIOS
+    iny
+    lda [sound_local_word_0],y
+    sta stream_arpeggio_offset,x
+      endif
 
     rts
 
@@ -1256,6 +1132,7 @@ stream_set_length_s:
     sta stream_note_length_counter_hi,x
 
     rts
+
 
 stream_set_length_lo:
 
@@ -1317,6 +1194,7 @@ stream_goto:
 
     rts
 
+
 ;This opcode stores the current stream read address in
 ;return_stream_read_address (lo and hi) and then reads the
 ;following two bytes and stores them in the current stream read address.
@@ -1325,10 +1203,7 @@ stream_goto:
 ;This is how the engine can allow repeated chunks of a song.
 stream_call:
 
-    inc stream_read_address_lo,x
-    bne .skip1
-    inc stream_read_address_hi,x
-.skip1
+    advance_stream_read_address
     lda stream_read_address_lo,x
     sta sound_local_word_0
     lda stream_read_address_hi,x
@@ -1343,10 +1218,7 @@ stream_call:
     lda [sound_local_word_0],y
     sta sound_local_word_1+1
 
-    inc stream_read_address_lo,x
-    bne .skip2
-    inc stream_read_address_hi,x
-.skip2
+    advance_stream_read_address
 
     ;Now store current stream read address in stream's return address.
     lda stream_read_address_lo,x
@@ -1365,6 +1237,7 @@ stream_call:
 
     rts
 
+
 ;This opcode restores the stream_return_address to the stream_read_address
 ;and continues where it left off.
 stream_return:
@@ -1375,6 +1248,7 @@ stream_return:
     sta stream_read_address_hi,x
 
     rts
+
 
 ;This opcode returns from the parent caller by popping two bytes off
 ;the stack and then doing rts.
@@ -1408,7 +1282,6 @@ stream_terminate:
 ;Assumed to be four addresses to initialize streams on, for square1, square2, triangle and noise.
 ;Any addresses found to be zero will not initialize that channel.
 play_song:
-.tempo_offset = sound_local_byte_0
 
     ;Save index regs.
     tya
@@ -1421,7 +1294,7 @@ play_song:
     ;Select header tempo offset based on region.
     ldx sound_region
     lda sound_region_to_tempo_offset,x
-    sta .tempo_offset
+    sta sound_local_byte_0
 
     ;Get song address from song list.
     lda sound_param_byte_0
@@ -1455,7 +1328,7 @@ play_song:
 
     clc
     lda #track_header_ntsc_tempo_lo
-    adc .tempo_offset
+    adc sound_local_byte_0
     tay
     lda [song_address],y
     sta stream_tempo_lo,x
@@ -1489,7 +1362,7 @@ play_song:
 
     clc
     lda #track_header_ntsc_tempo_lo
-    adc .tempo_offset
+    adc sound_local_byte_0
     tay
     lda [song_address],y
     sta stream_tempo_lo,x
@@ -1523,7 +1396,7 @@ play_song:
 
     clc
     lda #track_header_ntsc_tempo_lo
-    adc .tempo_offset
+    adc sound_local_byte_0
     tay
     lda [song_address],y
     sta stream_tempo_lo,x
@@ -1557,7 +1430,7 @@ play_song:
 
     clc
     lda #track_header_ntsc_tempo_lo
-    adc .tempo_offset
+    adc sound_local_byte_0
     tay
     lda [song_address],y
     sta stream_tempo_lo,x
@@ -1569,7 +1442,7 @@ play_song:
     sta stream_tempo_counter_hi,x
 .no_noise:
 
-    ifdef FEATURE_DPCM
+      ifdef FEATURE_DPCM
     ;Load dpcm stream.
     ldx #4
     jsr stream_stop
@@ -1595,7 +1468,7 @@ play_song:
 
     clc
     lda #track_header_ntsc_tempo_lo
-    adc .tempo_offset
+    adc sound_local_byte_0
     tay
     lda [song_address],y
     sta stream_tempo_lo,x
@@ -1606,7 +1479,7 @@ play_song:
     sta stream_tempo_hi,x
     sta stream_tempo_counter_hi,x
 .no_dpcm:
-    endif
+      endif
 
     dec sound_disable_update
 
@@ -1618,14 +1491,12 @@ play_song:
 
     rts
 
+
 ;Expects sound_param_byte_0 to contain the index of the sound effect to play.
 ;Expects sound_param_byte_1 to contain the sound effect priority. This can
-;be one of two values: soundeffect_one, and soundeffect_two from ggsound.inc..
+;be one of two values: soundeffect_one, and soundeffect_two from ggsound.inc.
 ;Assumes the parameters are correct; no range checking is performed.
 play_sfx:
-.sfx_stream = sound_local_byte_0
-.tempo_offset = sound_local_byte_1
-.sfx_address = sound_local_word_0
 
     ;Save index regs.
     tya
@@ -1638,205 +1509,205 @@ play_sfx:
     ;Select header tempo offset based on region.
     ldx sound_region
     lda sound_region_to_tempo_offset,x
-    sta .tempo_offset
+    sta sound_local_byte_1
 
     ;Get sfx address from sfx list.
     lda sound_param_byte_0
     asl a
     tay
     lda [sfx_list_address],y
-    sta .sfx_address
+    sta sound_local_word_0
     iny
     lda [sfx_list_address],y
-    sta .sfx_address+1
+    sta sound_local_word_0+1
 
     lda sound_param_byte_1
-    sta .sfx_stream
+    sta sound_local_byte_0
 
     ;Load square 1 stream.
     ldy #track_header_square1_stream_address
-    lda [.sfx_address],y
+    lda [sound_local_word_0],y
     sta sound_param_word_0
     iny
-    lda [.sfx_address],y
+    lda [sound_local_word_0],y
     beq .no_square_1
     sta sound_param_word_0+1
 
     lda #0
     sta sound_param_byte_0
 
-    lda .sfx_stream
+    lda sound_local_byte_0
     sta sound_param_byte_1
 
     jsr stream_initialize
 
-    ldx .sfx_stream
+    ldx sound_local_byte_0
     clc
     lda #track_header_ntsc_tempo_lo
-    adc .tempo_offset
+    adc sound_local_byte_1
     tay
-    lda [.sfx_address],y
+    lda [sound_local_word_0],y
     sta stream_tempo_lo,x
     sta stream_tempo_counter_lo,x
     iny
-    lda [.sfx_address],y
+    lda [sound_local_word_0],y
     sta stream_tempo_hi,x
     sta stream_tempo_counter_hi,x
 
-    inc .sfx_stream
+    inc sound_local_byte_0
 .no_square_1:
 
-    lda .sfx_stream
+    lda sound_local_byte_0
     cmp #(soundeffect_two + 1)
-    bne .skip1
+    bne .skip0
     jmp .no_more_sfx_streams_available
-.skip1:
+.skip0:
 
     ;Load square 2 stream.
     ldy #track_header_square2_stream_address
-    lda [.sfx_address],y
+    lda [sound_local_word_0],y
     sta sound_param_word_0
     iny
-    lda [.sfx_address],y
+    lda [sound_local_word_0],y
     beq .no_square_2
     sta sound_param_word_0+1
 
     lda #1
     sta sound_param_byte_0
 
-    lda .sfx_stream
+    lda sound_local_byte_0
     sta sound_param_byte_1
 
     jsr stream_initialize
 
-    ldx .sfx_stream
+    ldx sound_local_byte_0
     clc
     lda #track_header_ntsc_tempo_lo
-    adc .tempo_offset
+    adc sound_local_byte_1
     tay
-    lda [.sfx_address],y
+    lda [sound_local_word_0],y
     sta stream_tempo_lo,x
     sta stream_tempo_counter_lo,x
     iny
-    lda [.sfx_address],y
+    lda [sound_local_word_0],y
     sta stream_tempo_hi,x
     sta stream_tempo_counter_hi,x
 
-    inc .sfx_stream
+    inc sound_local_byte_0
 .no_square_2:
 
-    lda .sfx_stream
+    lda sound_local_byte_0
     cmp #(soundeffect_two + 1)
-    bne .skip2
+    bne .skip1
     jmp .no_more_sfx_streams_available
-.skip2:
+.skip1:
 
     ;Load triangle stream.
     ldy #track_header_triangle_stream_address
-    lda [.sfx_address],y
+    lda [sound_local_word_0],y
     sta sound_param_word_0
     iny
-    lda [.sfx_address],y
+    lda [sound_local_word_0],y
     beq .no_triangle
     sta sound_param_word_0+1
 
     lda #2
     sta sound_param_byte_0
 
-    lda .sfx_stream
+    lda sound_local_byte_0
     sta sound_param_byte_1
 
     jsr stream_initialize
 
-    ldx .sfx_stream
+    ldx sound_local_byte_0
     clc
     lda #track_header_ntsc_tempo_lo
-    adc .tempo_offset
+    adc sound_local_byte_1
     tay
-    lda [.sfx_address],y
+    lda [sound_local_word_0],y
     sta stream_tempo_lo,x
     sta stream_tempo_counter_lo,x
     iny
-    lda [.sfx_address],y
+    lda [sound_local_word_0],y
     sta stream_tempo_hi,x
     sta stream_tempo_counter_hi,x
 
-    inc .sfx_stream
+    inc sound_local_byte_0
 .no_triangle:
 
-    lda .sfx_stream
+    lda sound_local_byte_0
     cmp #(soundeffect_two + 1)
     beq .no_more_sfx_streams_available
 
     ;Load noise stream.
     ldy #track_header_noise_stream_address
-    lda [.sfx_address],y
+    lda [sound_local_word_0],y
     sta sound_param_word_0
     iny
-    lda [.sfx_address],y
+    lda [sound_local_word_0],y
     beq .no_noise
     sta sound_param_word_0+1
 
     lda #3
     sta sound_param_byte_0
 
-    lda .sfx_stream
+    lda sound_local_byte_0
     sta sound_param_byte_1
 
     jsr stream_initialize
 
-    ldx .sfx_stream
+    ldx sound_local_byte_0
     clc
     lda #track_header_ntsc_tempo_lo
-    adc .tempo_offset
+    adc sound_local_byte_1
     tay
-    lda [.sfx_address],y
+    lda [sound_local_word_0],y
     sta stream_tempo_lo,x
     sta stream_tempo_counter_lo,x
     iny
-    lda [.sfx_address],y
+    lda [sound_local_word_0],y
     sta stream_tempo_hi,x
     sta stream_tempo_counter_hi,x
 
-    inc .sfx_stream
+    inc sound_local_byte_0
 .no_noise:
 
-    ifdef FEATURE_DPCM
+      ifdef FEATURE_DPCM
     ;Load dpcm stream.
     ldy #track_header_dpcm_stream_address
-    lda [.sfx_address],y
+    lda [sound_local_word_0],y
     sta sound_param_word_0
     iny
-    lda [.sfx_address],y
+    lda [sound_local_word_0],y
     beq .no_dpcm
     sta sound_param_word_0+1
 
     lda #4
     sta sound_param_byte_0
 
-    lda .sfx_stream
+    lda sound_local_byte_0
     sta sound_param_byte_1
 
     jsr stream_initialize
 
-    ldx .sfx_stream
+    ldx sound_local_byte_0
     clc
     lda #track_header_ntsc_tempo_lo
-    adc .tempo_offset
+    adc sound_local_byte_1
     tay
-    lda [.sfx_address],y
+    lda [sound_local_word_0],y
     sta stream_tempo_lo,x
     sta stream_tempo_counter_lo,x
 
     iny
-    lda [.sfx_address],y
+    lda [sound_local_word_0],y
     sta stream_tempo_hi,x
     sta stream_tempo_counter_hi,x
 
     lda #DPCM_STATE_UPLOAD_THEN_WAIT
     sta apu_dpcm_state
 .no_dpcm:
-    endif
+     endif
 
 .no_more_sfx_streams_available:
 
@@ -1849,6 +1720,7 @@ play_sfx:
     tay
 
     rts
+
 
 ;Pauses all music streams by clearing volume bits from all channel registers
 ;and setting the pause flag so these streams are not updated.
@@ -1870,6 +1742,7 @@ pause_song:
 
     rts
 
+
 ;Resumes all music streams.
 resume_song:
 
@@ -1884,6 +1757,7 @@ resume_song:
     bpl .next_stream
 
     rts
+
 
 ;Expects sound_param_byte_0 to contain the channel on which to play the stream.
 ;Expects sound_param_byte_1 to contain the offset of the stream instance to initialize.
@@ -1919,20 +1793,15 @@ starting_read_address = sound_param_word_0
     sta stream_note_length_hi,x
     sta stream_note_length_counter_hi,x
 
-    ;Set initial envelope indices.
+    ;Set initial instrument index.
     lda #0
-    sta stream_volume_index,x
-    sta stream_pitch_index,x
-    sta stream_duty_index,x
+    sta stream_instrument_index,x
     sta stream_volume_offset,x
     sta stream_pitch_offset,x
     sta stream_duty_offset,x
-    ifdef FEATURE_ARPEGGIOS
-    sta stream_arpeggio_index,x
-    ;Set arpeggio offset to 1 because index 0 contains arpeggio type.
-    lda #1
+      ifdef FEATURE_ARPEGGIOS
     sta stream_arpeggio_offset,x
-    endif
+      endif
 
     ;Set channel.
     lda channel
@@ -1979,6 +1848,7 @@ stream_stop:
 
     rts
 
+
 ;Updates a single stream.
 ;Expects x to be pointing to a stream instance as an offset from streams.
 stream_update:
@@ -1987,24 +1857,24 @@ read_address = sound_local_word_1
 
     lda stream_flags,x
     and #STREAM_PAUSE_TEST
-    beq .skip_paused
+    beq .skip0
     rts
-.skip_paused:
+.skip0:
 
     ;Load current read address of stream.
     lda stream_read_address_lo,x
-    sta <read_address
+    sta read_address
     lda stream_read_address_hi,x
-    sta <(read_address+1)
+    sta read_address+1
 
     ;Load next byte from stream data.
     lda stream_flags,x
     and #STREAM_PITCH_LOADED_TEST
-    bne .skip
+    bne .skip1
     ldy #0
     lda [read_address],y
     sta stream_note,x
-    .skip:
+.skip1:
 
     ;Is this byte a note or a stream opcode?
     cmp #OPCODES_BASE
@@ -2024,10 +1894,7 @@ read_address = sound_local_word_1
     jsr indirect_jsr_callback_address
 
     ;Advance the stream's read address.
-    inc stream_read_address_lo,x
-    bne .skip2
-    inc stream_read_address_hi,x
-.skip2:
+    advance_stream_read_address
 
     ;Immediately process the next opcode or note. The idea here is that
     ;all stream control opcodes will execute during the current frame as "setup"
@@ -2037,15 +1904,16 @@ read_address = sound_local_word_1
     ;address off the stack and then performing an rts, effectively returning
     ;from its caller, this routine.
     jmp stream_update
+
 .process_note:
 
     ;Determine which channel callback to use.
     lda stream_channel,x
     tay
     lda channel_callback_table_lo,y
-    sta <callback_address
+    sta callback_address
     lda channel_callback_table_hi,y
-    sta <(callback_address+1)
+    sta callback_address+1
 
     ;Call the channel callback!
     jsr indirect_jsr_callback_address
@@ -2090,16 +1958,26 @@ read_address = sound_local_word_1
     lda stream_note_length_hi,x
     sta stream_note_length_counter_hi,x
 
-    ;Reset volume, pitch, and duty offsets.
-    lda #0
+    ldy stream_instrument_index,x
+    lda [addr_instruments],y
+    sta sound_local_word_0
+    iny
+    lda [addr_instruments],y
+    sta sound_local_word_0+1
+    ldy #0
+    lda [sound_local_word_0],y
     sta stream_volume_offset,x
+    iny
+    lda [sound_local_word_0],y
     sta stream_pitch_offset,x
+    iny
+    lda [sound_local_word_0],y
     sta stream_duty_offset,x
-    ifdef FEATURE_ARPEGGIOS
-    ;Set arpeggio offset to 1 because index 0 contains arpeggio type.
-    lda #1
+      ifdef FEATURE_ARPEGGIOS
+    iny
+    lda [sound_local_word_0],y
     sta stream_arpeggio_offset,x
-    endif
+      endif
 
     ;Reset silence until note and pitch loaded flags.
     lda stream_flags,x
@@ -2108,10 +1986,7 @@ read_address = sound_local_word_1
     sta stream_flags,x
 
     ;Advance the stream's read address.
-    inc stream_read_address_lo,x
-    bne .skip1
-    inc stream_read_address_hi,x
-.skip1:
+    advance_stream_read_address
 .do_not_advance_note_length_counter:
 .note_length_counter_not_zero:
 
@@ -2120,6 +1995,7 @@ read_address = sound_local_word_1
 indirect_jsr_callback_address:
     jmp [callback_address]
     rts
+
 
 sound_initialize_apu_buffer:
 
@@ -2194,7 +2070,7 @@ sound_initialize_apu_buffer:
     lda #%00000000
     sta apu_register_sets+15
 
-    ifdef FEATURE_DPCM
+      ifdef FEATURE_DPCM
     ;****************************************************************
     ;Initialize DPCM
     ;****************************************************************
@@ -2209,7 +2085,7 @@ sound_initialize_apu_buffer:
 
     lda #0
     sta apu_register_sets+19
-    endif
+      endif
 
     rts
 
@@ -2224,7 +2100,6 @@ sound_upload:
 
     rts
 
-;This is adapted from MetalSlime's Nerdy Nights sound engine.
 sound_upload_apu_register_sets:
 .square1:
     lda apu_register_sets+0
@@ -2261,7 +2136,7 @@ sound_upload_apu_register_sets:
     sta $400A
     lda apu_register_sets+11
     sta $400B
-noise:
+.noise:
     lda apu_register_sets+12
     sta $400C
     lda apu_register_sets+14
@@ -2280,44 +2155,50 @@ noise:
     lda #%10000000
     sta apu_register_sets+8
 
-    ifdef FEATURE_DPCM
+      ifdef FEATURE_DPCM
     ;Now execute DPCM command/state machine. This state machine has logic for allowing
     ;a DPCM sound effect to override the currenty playing music DPCM sample until finished.
-dpcm:
+.dpcm:
     ldx apu_dpcm_state
-    lda dpcm_state_callback_hi,x
+    lda .dpcm_state_callback_hi,x
     pha
-    lda dpcm_state_callback_lo,x
+    lda .dpcm_state_callback_lo,x
     pha
     rts
-dpcm_upload:
-    jsr dpcm_upload_registers
+.dpcm_upload:
+    jsr .dpcm_upload_registers
     lda #DPCM_STATE_NOP
     sta apu_dpcm_state
     rts
-dpcm_upload_then_wait:
-    jsr dpcm_upload_registers
+.dpcm_upload_then_wait:
+    jsr .dpcm_upload_registers
     lda #DPCM_STATE_WAIT
     sta apu_dpcm_state
     rts
-dpcm_wait:
+.dpcm_wait:
     lda $4015
     and #%00010000
-    bne .skip_reset_apu_dpcm_state
+    bne .skip
     lda #DPCM_STATE_NOP
     sta apu_dpcm_state
-.skip_reset_apu_dpcm_state:
+.skip:
     rts
-dpcm_nop:
+.dpcm_nop:
     rts
 
-dpcm_state_callback_lo:
-    .db low(dpcm_nop-1), low(dpcm_upload-1), low(dpcm_upload_then_wait-1), low(dpcm_wait-1)
+.dpcm_state_callback_lo:
+    .db low((.dpcm_nop-1))
+    .db low((.dpcm_upload-1))
+    .db low((.dpcm_upload_then_wait-1))
+    .db low((.dpcm_wait-1))
 
-dpcm_state_callback_hi:
-    .db high(dpcm_nop-1), high(dpcm_upload-1), high(dpcm_upload_then_wait-1), high(dpcm_wait-1)
+.dpcm_state_callback_hi:
+    .db high((.dpcm_nop-1))
+    .db high((.dpcm_upload-1))
+    .db high((.dpcm_upload_then_wait-1))
+    .db high((.dpcm_wait-1))
 
-dpcm_upload_registers:
+.dpcm_upload_registers:
     lda apu_register_sets+16
     sta $4010
     lda apu_register_sets+17
@@ -2332,6 +2213,7 @@ dpcm_upload_registers:
     lda #%00011111
     sta $4015
     rts
-    else
+      else
     rts
-    endif
+      endif
+

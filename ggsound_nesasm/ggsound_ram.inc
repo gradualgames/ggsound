@@ -4,15 +4,13 @@ stream_note_length_lo:         .rs MAX_STREAMS
 stream_note_length_hi:         .rs MAX_STREAMS
 stream_note_length_counter_lo: .rs MAX_STREAMS
 stream_note_length_counter_hi: .rs MAX_STREAMS
-stream_volume_index:           .rs MAX_STREAMS
+stream_instrument_index:       .rs MAX_STREAMS
 stream_volume_offset:          .rs MAX_STREAMS
   ifdef FEATURE_ARPEGGIOS
 stream_arpeggio_index:         .rs MAX_STREAMS
 stream_arpeggio_offset:        .rs MAX_STREAMS
   endif
-stream_pitch_index:            .rs MAX_STREAMS
 stream_pitch_offset:           .rs MAX_STREAMS
-stream_duty_index:             .rs MAX_STREAMS
 stream_duty_offset:            .rs MAX_STREAMS
 
 stream_channel:                .rs MAX_STREAMS

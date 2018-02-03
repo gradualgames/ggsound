@@ -62,8 +62,9 @@ def main():
             nesasm_line = line.replace(".byte", ".db")
             nesasm_line = nesasm_line.replace("<", "low(")
             nesasm_line = nesasm_line.replace(">", "high(")
-            nesasm_line = nesasm_line.replace(",", "),")
-            nesasm_line = nesasm_line.rstrip() + ")\n"
+            if "low" in nesasm_line or "high" in nesasm_line:
+                nesasm_line = nesasm_line.replace(",", "),")
+                nesasm_line = nesasm_line.rstrip() + ")\n"
             asm6.append(asm6_line)
             nesasm.append(nesasm_line)
             continue
@@ -91,11 +92,6 @@ def main():
             asm6.append("    %s a\n" % line.strip())
             nesasm.append("    %s a\n" % line.strip())
             continue
-        pattern = re.compile("    [a-z][a-z][a-z]")
-        if pattern.match(line):
-            asm6.append(line)
-            nesasm.append(line.replace("(", "[").replace(")", "]"))
-            continue
         pattern = re.compile("[a-z0-9_]+:")
         if pattern.match(line):
             asm6_prefix = ""
@@ -107,26 +103,47 @@ def main():
             asm6.append("%s%s" % (asm6_prefix, line))
             nesasm.append("%s%s" % (nesasm_prefix, line))
             continue
-        pattern = re.compile("[a-z0-9_]+ = [a-z0-9_]")
+        pattern = re.compile(" *[a-z0-9_]+ = [a-z0-9_]+")
         if pattern.match(line):
             asm6.append(line)
-            nesasm.append(line)
+            nesasm.append(line.lstrip())
+            continue
+        pattern = re.compile("    [a-z][a-z][a-z]")
+        if pattern.match(line):
+            asm6.append(line)
+            nesasm_line = line
+            if line.endswith(",y\n") or "   jmp" in line:
+                nesasm_line = line.replace("(", "[").replace(")", "]")
+            if "#<" in nesasm_line:
+                nesasm_line = nesasm_line.replace("#<", "#low(").rstrip() + ")\n"
+            if "#>" in nesasm_line:
+                nesasm_line = nesasm_line.replace("#>", "#high(").rstrip() + ")\n"
+            nesasm.append(nesasm_line)
             continue
         asm6.append(line.strip() + " ;did not convert\n")
         nesasm.append(line.strip() + " ;did not convert\n")
 
     # Now look for usages of labels and get their prefixes in place
-    for i in range(0, len(asm6)):
-        line = asm6[i]
-        pattern = re.compile(".*;.*")
-        if not pattern.match(line):
-            for label in labels:
-                if label in line:
-                    possible_labels = []
-                    for match in re.finditer("(?<!@)[a-zA-Z0-9_]+", line):
-                        possible_labels.append(match.group(0))
-                    if label in possible_labels:
-                        asm6[i] = line.replace(label, "@%s" % label)
+    def add_prefixes(lines, prefix_pattern, prefix):
+        for i in range(0, len(lines)):
+            line = lines[i]
+            pattern = re.compile(".*;.*")
+            if not pattern.match(line):
+                for label in labels:
+                    if label in line:
+                        possible_labels = []
+                        for match in re.finditer(prefix_pattern, line):
+                            possible_labels.append(match.group(0))
+                        if label in possible_labels:
+                            lines[i] = line.replace(label, "%s%s" % (prefix, label))
+
+    add_prefixes(asm6, "(?<!@)[a-zA-Z0-9_]+", "@")
+    add_prefixes(nesasm, "(?<!\.)[a-zA-Z0-9_]+", ".")
+
+    for i in range(0, len(nesasm)):
+        line = nesasm[i]
+        if "base_address_" in line:
+            nesasm[i] = line.replace("base_address_", "addr_")
 
     with open(asm6_output_file, 'w') as f:
         for line in asm6:

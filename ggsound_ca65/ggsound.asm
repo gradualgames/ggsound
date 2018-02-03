@@ -1384,7 +1384,6 @@ not_sound_effect:
 ;Assumed to be four addresses to initialize streams on, for square1, square2, triangle and noise.
 ;Any addresses found to be zero will not initialize that channel.
 .proc play_song
-    tempo_offset = sound_local_byte_0
 
     ;Save index regs.
     tya
@@ -1397,7 +1396,7 @@ not_sound_effect:
     ;Select header tempo offset based on region.
     ldx sound_region
     lda sound_region_to_tempo_offset,x
-    sta tempo_offset
+    sta sound_local_byte_0
 
     ;Get song address from song list.
     lda sound_param_byte_0
@@ -1431,7 +1430,7 @@ not_sound_effect:
 
     clc
     lda #track_header_ntsc_tempo_lo
-    adc tempo_offset
+    adc sound_local_byte_0
     tay
     lda (song_address),y
     sta stream_tempo_lo,x
@@ -1465,7 +1464,7 @@ no_square_1:
 
     clc
     lda #track_header_ntsc_tempo_lo
-    adc tempo_offset
+    adc sound_local_byte_0
     tay
     lda (song_address),y
     sta stream_tempo_lo,x
@@ -1499,7 +1498,7 @@ no_square_2:
 
     clc
     lda #track_header_ntsc_tempo_lo
-    adc tempo_offset
+    adc sound_local_byte_0
     tay
     lda (song_address),y
     sta stream_tempo_lo,x
@@ -1533,7 +1532,7 @@ no_triangle:
 
     clc
     lda #track_header_ntsc_tempo_lo
-    adc tempo_offset
+    adc sound_local_byte_0
     tay
     lda (song_address),y
     sta stream_tempo_lo,x
@@ -1571,7 +1570,7 @@ no_noise:
 
     clc
     lda #track_header_ntsc_tempo_lo
-    adc tempo_offset
+    adc sound_local_byte_0
     tay
     lda (song_address),y
     sta stream_tempo_lo,x
@@ -1601,9 +1600,6 @@ no_dpcm:
 ;be one of two values: soundeffect_one, and soundeffect_two from ggsound.inc.
 ;Assumes the parameters are correct; no range checking is performed.
 .proc play_sfx
-    sfx_stream = sound_local_byte_0
-    tempo_offset = sound_local_byte_1
-    sfx_address = sound_local_word_0
 
     ;Save index regs.
     tya
@@ -1616,55 +1612,55 @@ no_dpcm:
     ;Select header tempo offset based on region.
     ldx sound_region
     lda sound_region_to_tempo_offset,x
-    sta tempo_offset
+    sta sound_local_byte_1
 
     ;Get sfx address from sfx list.
     lda sound_param_byte_0
     asl
     tay
     lda (sfx_list_address),y
-    sta sfx_address
+    sta sound_local_word_0
     iny
     lda (sfx_list_address),y
-    sta sfx_address+1
+    sta sound_local_word_0+1
 
     lda sound_param_byte_1
-    sta sfx_stream
+    sta sound_local_byte_0
 
     ;Load square 1 stream.
     ldy #track_header_square1_stream_address
-    lda (sfx_address),y
+    lda (sound_local_word_0),y
     sta sound_param_word_0
     iny
-    lda (sfx_address),y
+    lda (sound_local_word_0),y
     beq no_square_1
     sta sound_param_word_0+1
 
     lda #0
     sta sound_param_byte_0
 
-    lda sfx_stream
+    lda sound_local_byte_0
     sta sound_param_byte_1
 
     jsr stream_initialize
 
-    ldx sfx_stream
+    ldx sound_local_byte_0
     clc
     lda #track_header_ntsc_tempo_lo
-    adc tempo_offset
+    adc sound_local_byte_1
     tay
-    lda (sfx_address),y
+    lda (sound_local_word_0),y
     sta stream_tempo_lo,x
     sta stream_tempo_counter_lo,x
     iny
-    lda (sfx_address),y
+    lda (sound_local_word_0),y
     sta stream_tempo_hi,x
     sta stream_tempo_counter_hi,x
 
-    inc sfx_stream
+    inc sound_local_byte_0
 no_square_1:
 
-    lda sfx_stream
+    lda sound_local_byte_0
     cmp #(soundeffect_two + 1)
     bne skip0
     jmp no_more_sfx_streams_available
@@ -1672,38 +1668,38 @@ skip0:
 
     ;Load square 2 stream.
     ldy #track_header_square2_stream_address
-    lda (sfx_address),y
+    lda (sound_local_word_0),y
     sta sound_param_word_0
     iny
-    lda (sfx_address),y
+    lda (sound_local_word_0),y
     beq no_square_2
     sta sound_param_word_0+1
 
     lda #1
     sta sound_param_byte_0
 
-    lda sfx_stream
+    lda sound_local_byte_0
     sta sound_param_byte_1
 
     jsr stream_initialize
 
-    ldx sfx_stream
+    ldx sound_local_byte_0
     clc
     lda #track_header_ntsc_tempo_lo
-    adc tempo_offset
+    adc sound_local_byte_1
     tay
-    lda (sfx_address),y
+    lda (sound_local_word_0),y
     sta stream_tempo_lo,x
     sta stream_tempo_counter_lo,x
     iny
-    lda (sfx_address),y
+    lda (sound_local_word_0),y
     sta stream_tempo_hi,x
     sta stream_tempo_counter_hi,x
 
-    inc sfx_stream
+    inc sound_local_byte_0
 no_square_2:
 
-    lda sfx_stream
+    lda sound_local_byte_0
     cmp #(soundeffect_two + 1)
     bne skip1
     jmp no_more_sfx_streams_available
@@ -1711,103 +1707,103 @@ skip1:
 
     ;Load triangle stream.
     ldy #track_header_triangle_stream_address
-    lda (sfx_address),y
+    lda (sound_local_word_0),y
     sta sound_param_word_0
     iny
-    lda (sfx_address),y
+    lda (sound_local_word_0),y
     beq no_triangle
     sta sound_param_word_0+1
 
     lda #2
     sta sound_param_byte_0
 
-    lda sfx_stream
+    lda sound_local_byte_0
     sta sound_param_byte_1
 
     jsr stream_initialize
 
-    ldx sfx_stream
+    ldx sound_local_byte_0
     clc
     lda #track_header_ntsc_tempo_lo
-    adc tempo_offset
+    adc sound_local_byte_1
     tay
-    lda (sfx_address),y
+    lda (sound_local_word_0),y
     sta stream_tempo_lo,x
     sta stream_tempo_counter_lo,x
     iny
-    lda (sfx_address),y
+    lda (sound_local_word_0),y
     sta stream_tempo_hi,x
     sta stream_tempo_counter_hi,x
 
-    inc sfx_stream
+    inc sound_local_byte_0
 no_triangle:
 
-    lda sfx_stream
+    lda sound_local_byte_0
     cmp #(soundeffect_two + 1)
     beq no_more_sfx_streams_available
 
     ;Load noise stream.
     ldy #track_header_noise_stream_address
-    lda (sfx_address),y
+    lda (sound_local_word_0),y
     sta sound_param_word_0
     iny
-    lda (sfx_address),y
+    lda (sound_local_word_0),y
     beq no_noise
     sta sound_param_word_0+1
 
     lda #3
     sta sound_param_byte_0
 
-    lda sfx_stream
+    lda sound_local_byte_0
     sta sound_param_byte_1
 
     jsr stream_initialize
 
-    ldx sfx_stream
+    ldx sound_local_byte_0
     clc
     lda #track_header_ntsc_tempo_lo
-    adc tempo_offset
+    adc sound_local_byte_1
     tay
-    lda (sfx_address),y
+    lda (sound_local_word_0),y
     sta stream_tempo_lo,x
     sta stream_tempo_counter_lo,x
     iny
-    lda (sfx_address),y
+    lda (sound_local_word_0),y
     sta stream_tempo_hi,x
     sta stream_tempo_counter_hi,x
 
-    inc sfx_stream
+    inc sound_local_byte_0
 no_noise:
 
     .ifdef FEATURE_DPCM
     ;Load dpcm stream.
     ldy #track_header_dpcm_stream_address
-    lda (sfx_address),y
+    lda (sound_local_word_0),y
     sta sound_param_word_0
     iny
-    lda (sfx_address),y
+    lda (sound_local_word_0),y
     beq no_dpcm
     sta sound_param_word_0+1
 
     lda #4
     sta sound_param_byte_0
 
-    lda sfx_stream
+    lda sound_local_byte_0
     sta sound_param_byte_1
 
     jsr stream_initialize
 
-    ldx sfx_stream
+    ldx sound_local_byte_0
     clc
     lda #track_header_ntsc_tempo_lo
-    adc tempo_offset
+    adc sound_local_byte_1
     tay
-    lda (sfx_address),y
+    lda (sound_local_word_0),y
     sta stream_tempo_lo,x
     sta stream_tempo_counter_lo,x
 
     iny
-    lda (sfx_address),y
+    lda (sound_local_word_0),y
     sta stream_tempo_hi,x
     sta stream_tempo_counter_hi,x
 

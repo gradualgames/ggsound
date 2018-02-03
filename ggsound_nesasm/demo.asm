@@ -1,3 +1,4 @@
+  LIST
   include "ppu.inc"
   include "ggsound.inc"
   include "controller.inc"
@@ -185,9 +186,9 @@ vblankwait2:
     sta sound_param_word_1
     lda #high(sfx_list)
     sta sound_param_word_1+1
-    lda #low(envelopes_list)
+    lda #low(instrument_list)
     sta sound_param_word_2
-    lda #high(envelopes_list)
+    lda #high(instrument_list)
     sta sound_param_word_2+1
     lda #low(dpcm_list)
     sta sound_param_word_3

@@ -17,14 +17,9 @@ sound_param_word_1: .rs 2
 sound_param_word_2: .rs 2
 sound_param_word_3: .rs 2
 
-addr_volume_envelopes: .rs 2
-  ifdef FEATURE_ARPEGGIOS
-addr_arpeggio_envelopes: .rs 2
-  endif
-addr_pitch_envelopes:  .rs 2
-addr_duty_envelopes:   .rs 2
-addr_note_table_lo: .rs 2
-addr_note_table_hi: .rs 2
+addr_instruments: .rs 2
+addr_note_table_lo:  .rs 2
+addr_note_table_hi:  .rs 2
   ifdef FEATURE_DPCM
 addr_dpcm_sample_table: .rs 2
 addr_dpcm_note_to_sample_index: .rs 2
