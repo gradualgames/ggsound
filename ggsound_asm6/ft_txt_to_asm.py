@@ -610,7 +610,6 @@ def main():
                 f.write("%s" % arpeggio_sub_type_to_str[arpeggio_macro["sub_type"]])
             f.write("\n")
             if total_bytes <= 256:
-                print("Output instrument: \"%s\" total length: %s" % (instrument_name, total_bytes))
                 for byte in instrument_asm:
                     f.write(byte)
             else:
