@@ -1466,6 +1466,12 @@ play_song:
     lda #DPCM_STATE_NOP
     sta apu_dpcm_state
 
+    ;Reset load counter to safeguard against accumulating too far
+    ;in one direction. (can cause distortion). Suggestion by thefox
+    ;on nesdev. I've never actually heard this distortion occur.
+    lda #0
+    sta $4011
+
     clc
     lda #track_header_ntsc_tempo_lo
     adc sound_local_byte_0
