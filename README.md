@@ -390,6 +390,18 @@ generate from your songs file with ft_txt_to_asm.py.
     jsr sound_initialize
 ```
 
+Please note that if you disable DPCM, the dpcm_list label will not be available
+and you can just leave out the following lines:
+
+```
+    lda #<dpcm_list
+    sta sound_param_word_3
+    lda #>dpcm_list
+    sta sound_param_word_3+1
+```
+
+If you are experimenting with the demo program, these lines are located in demo.asm.
+
 ## Updating:
 
 To hear anything at all, you must update GGSound on every frame.
@@ -432,6 +444,13 @@ play_song, like this:
     jsr play_song
 ```
 
+Please note that ft_txt_to_asm.py does not output any information
+about how many songs there are in your file, it is up to you to
+keep track of this. If you paste new data in track_data.inc in
+any of the demo programs, you will also have to modify demo.asm
+so that it won't play garbage songs past the end of your songs
+(it is hard coded for 6 songs as in the original demo data).
+
 ## Playing sound effects:
 
 Playing sound effects is nearly identical, except you must also
@@ -448,6 +467,13 @@ is playing.
     sta sound_param_byte_1
     jsr play_sfx
 ```
+
+Please note that ft_txt_to_asm.py does not output any information
+about how many sfx there are in your file, it is up to you to
+keep track of this. If you paste new data in track_data.inc in
+any of the demo programs, you will also have to modify demo.asm
+to use constants that point to the indices of the two sfx you
+wish to demo.
 
 ## Disabling features:
 
