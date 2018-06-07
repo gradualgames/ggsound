@@ -94,8 +94,13 @@ help exercise GGSound and the converter.
 to help exercise GGSound and the converter.
 * Famicuber - For bug reports and supplying sample songs to
 exercise GGSound.
+* Kasumi - For kicking my butt and making me want to improve
+GGSound's performance (compact instruments feature) as well as
+bug reports.
 
 # Changes:
+* 6-6-18:  Fixed label sanitization bug, we were not sanitizing instrument names!
+           Also now capital letters will show up in the asm.
 * 2-2-18:  Refactored how envelopes are stored and read during execution
            into a "compact instrument" 256 byte format. This helps performance
            but introduces the limitation that you cannot have extremely long

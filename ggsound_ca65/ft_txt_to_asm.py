@@ -283,7 +283,7 @@ def generate_asm_from_bytes(bytes, bytes_per_line, start_line=define_byte_direct
 
 def sanitize_label(label):
     new_label = "_"
-    allowed_characters = "_abcdefghijklmnopqrstuvwxyz0123456789"
+    allowed_characters = "_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
     for c in label:
         if c not in allowed_characters:
             new_label = new_label + "%x" % ord(c)
@@ -350,7 +350,7 @@ def main():
 
                 instrument["id"] = int(inst_split_line[1])
                 instrument["index"] = instruments.index(instrument)
-                instrument["name"] = "%s_%s" % ("_".join(inst_split_line[7:]).replace("\"", ""), instrument["index"])
+                instrument["name"] = sanitize_label("%s_%s" % ("_".join(inst_split_line[7:]).replace("\"", ""), instrument["index"]))
                 instrument_id_to_index[instrument["id"]] = instrument["index"]
 
             if split_line[0] == "TRACK":
